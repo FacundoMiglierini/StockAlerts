@@ -5,3 +5,7 @@ dist
 .env.test
 
 /src/generated/prisma
+
+# TypeScript incremental build cache — churns on every build, not meant to
+# be tracked.
+*.tsbuildinfo
