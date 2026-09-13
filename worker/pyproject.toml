@@ -1,0 +1,27 @@
+[project]
+name = "worker"
+version = "0.1.0"
+description = "Stock Alerts worker: evaluates alarm strategies against price data and notifies users."
+requires-python = ">=3.10"
+dependencies = [
+    "pandas",
+    "numpy",
+    "yfinance",
+    "requests",
+    "python-dotenv",
+    "scipy",
+    "sqlalchemy",
+    "psycopg[binary]",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+# This isn't an installed package (no [build-system] — see worker/CLAUDE.md
+# on why), so pytest needs to be told explicitly where to import `worker`
+# from rather than relying on it being on sys.path already.
+pythonpath = ["."]
+testpaths = ["tests"]

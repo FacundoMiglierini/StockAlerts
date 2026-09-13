@@ -1,0 +1,1 @@
+- Analizar variaciones de precio absolutas, no relativas (caídas/subidas de precio sin primer precio de referencia)

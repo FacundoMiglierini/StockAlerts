@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap">
+  <style>
+    :root{
+      --bg: oklch(98% 0.003 260);
+      --surface: oklch(100% 0 0);
+      --border: oklch(92% 0.004 260);
+      --text: oklch(22% 0.01 260);
+      --text-muted: oklch(52% 0.01 260);
+      --text-faint: oklch(68% 0.006 260);
+      --accent: oklch(58% 0.19 265);
+      --accent-soft: oklch(95% 0.025 265);
+      --radius-md: 10px;
+    }
+    .canvas[data-theme="dark"]{
+      --bg: oklch(19% 0.008 260);
+      --surface: oklch(24% 0.009 260);
+      --border: oklch(33% 0.012 260);
+      --text: oklch(94% 0.004 260);
+      --text-muted: oklch(66% 0.01 260);
+      --text-faint: oklch(50% 0.01 260);
+      --accent: oklch(64% 0.18 265);
+      --accent-soft: oklch(28% 0.06 265);
+    }
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+    .field{display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:600;color:var(--text-muted);}
+    .field input, .select{width:100%;font:inherit;font-size:14px;color:var(--text);padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg);}
+  </style>
+</helmet>
+<div class="canvas" data-theme="{{theme}}" style="width:390px;min-height:700px;background:var(--bg);color:var(--text);display:flex;flex-direction:column;">
+
+  <!-- Header -->
+  <header style="flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:16px;border-bottom:1px solid var(--border);background:var(--surface);">
+    <button type="button" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex:0 0 auto;color:var(--text);background:transparent;border:none;cursor:pointer;padding:0;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span style="font-size:16px;font-weight:800;letter-spacing:-0.01em;">New alarm</span>
+  </header>
+
+  <main style="flex:1;padding:20px 16px;display:flex;flex-direction:column;gap:16px;">
+    <label class="field">
+      Ticker
+      <input placeholder="AAPL" style="text-transform:uppercase;" />
+    </label>
+    <label class="field">
+      Market
+      <div class="select" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+        <span>NASDAQ <span style="color:var(--text-faint);">· USD</span></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-faint);flex:0 0 auto;"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </label>
+    <label class="field">
+      Strategy
+      <div class="select" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+        <span>Manual price threshold</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-faint);flex:0 0 auto;"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </label>
+    <label class="field">
+      Trigger price (USD)
+      <input type="number" value="0" />
+    </label>
+    <label class="field">
+      Target price (USD)
+      <input type="number" value="0" />
+    </label>
+
+    <div style="flex:1;"></div>
+
+    <button type="button" style="font:inherit;font-size:15px;font-weight:700;color:oklch(99% 0 0);background:var(--accent);border:1px solid var(--accent);border-radius:var(--radius-md);padding:13px 16px;cursor:pointer;">
+      Create alarm
+    </button>
+  </main>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"State"}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.theme ?? 'light' };
+  }
+}
+</script>
+</body>
+</html>

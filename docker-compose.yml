@@ -1,0 +1,98 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-stockalerts}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-stockalerts}
+      POSTGRES_DB: ${POSTGRES_DB:-stockalerts}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-stockalerts}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Only for e2e/integration tests — not started by a plain `docker compose
+  # up` (profile-gated). Ephemeral by design: tmpfs storage, no named
+  # volume, so `docker compose --profile test up -d postgres-test` always
+  # starts from a clean database. Separate port from the dev `postgres`
+  # service so both can run at once without conflict.
+  postgres-test:
+    image: postgres:16-alpine
+    profiles: ["test"]
+    tmpfs:
+      - /var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-stockalerts}:${POSTGRES_PASSWORD:-stockalerts}@postgres:5432/${POSTGRES_DB:-stockalerts}?schema=public
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+      JWT_EXPIRES_IN_SECONDS: ${JWT_EXPIRES_IN_SECONDS:-604800}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      BACKEND_MAIL_HOST: ${BACKEND_MAIL_HOST:-smtp.gmail.com}
+      BACKEND_MAIL_PORT: ${BACKEND_MAIL_PORT:-465}
+      BACKEND_MAIL_USERNAME: ${BACKEND_MAIL_USERNAME:-}
+      BACKEND_MAIL_EMAIL: ${BACKEND_MAIL_EMAIL:-}
+      BACKEND_MAIL_PASSWORD: ${BACKEND_MAIL_PASSWORD:-}
+    ports:
+      - "3000:3000"
+
+  worker:
+    build: ./worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-stockalerts}:${POSTGRES_PASSWORD:-stockalerts}@postgres:5432/${POSTGRES_DB:-stockalerts}?schema=public
+      WORKER_PRICE_HISTORY_PERIOD: ${WORKER_PRICE_HISTORY_PERIOD:-1y}
+      WORKER_POLL_INTERVAL_SECONDS: ${WORKER_POLL_INTERVAL_SECONDS:-3600}
+      WORKER_FINNHUB_API_KEY: ${WORKER_FINNHUB_API_KEY:-}
+      WORKER_FINNHUB_HISTORY_ENABLED: ${WORKER_FINNHUB_HISTORY_ENABLED:-false}
+      WORKER_FINNHUB_BASE_URL: ${WORKER_FINNHUB_BASE_URL:-https://finnhub.io/api/v1}
+      WORKER_MAIL_HOST: ${WORKER_MAIL_HOST:-smtp.gmail.com}
+      WORKER_MAIL_PORT: ${WORKER_MAIL_PORT:-465}
+      WORKER_MAIL_USERNAME: ${WORKER_MAIL_USERNAME:-}
+      WORKER_MAIL_EMAIL: ${WORKER_MAIL_EMAIL:-}
+      WORKER_MAIL_PASSWORD: ${WORKER_MAIL_PASSWORD:-}
+      WORKER_TELEGRAM_BOT_TOKEN: ${WORKER_TELEGRAM_BOT_TOKEN:-}
+      WORKER_TELEGRAM_API_BASE_URL: ${WORKER_TELEGRAM_API_BASE_URL:-https://api.telegram.org}
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked in at build time (static SPA, no runtime env) — rebuild
+        # this service if it changes.
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres_data:

@@ -1,0 +1,7 @@
+.env
+.env.*.local
+node_modules
+
+# Leftover from the original single-script prototype — contains a real
+# Postgres password, never commit it.
+old/stocks-credentials.txt

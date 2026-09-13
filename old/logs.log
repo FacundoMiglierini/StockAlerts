@@ -1,0 +1,600 @@
+2025-01-04 18:26:10.522612 Script triggered!
+2025-01-04 18:26:12.168616 Trade verification completed without errors.
+2025-01-05 18:00:04.056784 Script triggered!
+2025-01-05 18:00:06.266528 Trade verification completed without errors.
+2025-01-06 18:00:19.171359 Script triggered!
+2025-01-06 18:00:25.936313 Trade verification completed without errors.
+2025-01-07 18:00:10.361449 Script triggered!
+2025-01-07 18:00:14.264415 Trade verification completed without errors.
+2025-01-08 18:00:10.498154 Script triggered!
+2025-01-08 18:00:14.812374 Trade verification completed without errors.
+2025-01-09 18:00:10.362177 Script triggered!
+2025-01-09 18:00:16.626037 Email sent successfully: AGRO.BA
+2025-01-09 18:00:17.524361 Trade verification completed without errors.
+2025-01-09 18:00:17.528326 Alarms dataset updated successfully!
+2025-01-10 18:00:11.959058 Script triggered!
+2025-01-10 18:00:16.664430 Trade verification completed without errors.
+2025-01-11 18:00:11.497174 Script triggered!
+2025-01-11 18:00:15.677264 Trade verification completed without errors.
+2025-01-12 18:00:10.979004 Script triggered!
+2025-01-12 18:00:15.565007 Trade verification completed without errors.
+2025-01-14 18:00:12.185868 Script triggered!
+2025-01-14 18:00:16.787612 Trade verification completed without errors.
+2025-01-15 18:00:11.082919 Script triggered!
+2025-01-15 18:00:15.925400 Trade verification completed without errors.
+2025-01-16 18:00:11.292519 Script triggered!
+2025-01-16 18:00:15.876595 Trade verification completed without errors.
+2025-01-18 18:00:11.941340 Script triggered!
+2025-01-18 18:00:16.385783 Trade verification completed without errors.
+2025-01-20 18:00:12.083845 Script triggered!
+2025-01-20 18:00:17.828173 Trade verification completed without errors.
+2025-01-21 18:00:12.161718 Script triggered!
+2025-01-21 18:00:17.693055 Trade verification completed without errors.
+2025-01-24 18:00:11.912533 Script triggered!
+2025-01-24 18:00:19.415553 Email sent successfully: INTC.BA
+2025-01-24 18:00:20.548597 Trade verification completed without errors.
+2025-01-24 18:00:20.553404 Alarms dataset updated successfully!
+2025-01-25 18:00:12.750245 Script triggered!
+2025-01-25 18:00:19.203199 Trade verification completed without errors.
+2025-01-26 18:00:11.918897 Script triggered!
+2025-01-26 18:00:17.518233 Trade verification completed without errors.
+2025-01-28 18:00:11.832990 Script triggered!
+2025-01-28 18:00:17.882493 Trade verification completed without errors.
+2025-01-29 18:00:11.911398 Script triggered!
+2025-01-29 18:00:17.577384 Trade verification completed without errors.
+2025-02-03 18:14:47.978133 Script triggered!
+2025-02-03 18:14:51.467609 Trade verification completed without errors.
+2025-02-05 18:00:11.858391 Script triggered!
+2025-02-05 18:00:18.404039 Trade verification completed without errors.
+2025-02-05 18:14:37.611536 Script triggered!
+2025-02-05 18:14:43.523247 Trade verification completed without errors.
+2025-02-06 18:00:12.996824 Script triggered!
+2025-02-06 18:00:19.820044 Email sent successfully: METR.BA
+2025-02-06 18:00:23.281063 Trade verification completed without errors.
+2025-02-06 18:00:23.284442 Alarms dataset updated successfully!
+2025-02-11 15:39:02.074893 Script triggered!
+2025-02-11 15:39:09.903954 Email sent successfully: CARC.BA
+2025-02-11 15:39:11.859876 Trade verification completed without errors.
+2025-02-11 15:39:11.864206 Alarms dataset updated successfully!
+2025-02-11 18:00:04.676805 Script triggered!
+2025-02-11 18:00:09.169271 Trade verification completed without errors.
+2025-02-12 18:00:12.015405 Script triggered!
+2025-02-12 18:00:25.225556 Trade verification completed without errors.
+2025-02-15 18:00:13.152941 Script triggered!
+2025-02-15 18:00:19.879864 Trade verification completed without errors.
+
+1 Failed download:
+['METR.BA']: RuntimeError('*** YAHOO! FINANCE IS CURRENTLY DOWN! ***\nOur engineers are working quickly to resolve the issue. Thank you for your patience.')
+
+1 Failed download:
+['VALO.BA']: RuntimeError('*** YAHOO! FINANCE IS CURRENTLY DOWN! ***\nOur engineers are working quickly to resolve the issue. Thank you for your patience.')
+
+1 Failed download:
+['AGRO.BA']: RuntimeError('*** YAHOO! FINANCE IS CURRENTLY DOWN! ***\nOur engineers are working quickly to resolve the issue. Thank you for your patience.')
+
+1 Failed download:
+['BOLT.BA']: RuntimeError('*** YAHOO! FINANCE IS CURRENTLY DOWN! ***\nOur engineers are working quickly to resolve the issue. Thank you for your patience.')
+
+1 Failed download:
+['CARC.BA']: RuntimeError('*** YAHOO! FINANCE IS CURRENTLY DOWN! ***\nOur engineers are working quickly to resolve the issue. Thank you for your patience.')
+
+1 Failed download:
+['NVDA.BA']: RuntimeError('*** YAHOO! FINANCE IS CURRENTLY DOWN! ***\nOur engineers are working quickly to resolve the issue. Thank you for your patience.')
+
+1 Failed download:
+['AMD.BA']: RuntimeError('*** YAHOO! FINANCE IS CURRENTLY DOWN! ***\nOur engineers are working quickly to resolve the issue. Thank you for your patience.')
+
+1 Failed download:
+['INTC.BA']: RuntimeError('*** YAHOO! FINANCE IS CURRENTLY DOWN! ***\nOur engineers are working quickly to resolve the issue. Thank you for your patience.')
+
+1 Failed download:
+['TSM.BA']: RuntimeError('*** YAHOO! FINANCE IS CURRENTLY DOWN! ***\nOur engineers are working quickly to resolve the issue. Thank you for your patience.')
+
+1 Failed download:
+['T.BA']: RuntimeError('*** YAHOO! FINANCE IS CURRENTLY DOWN! ***\nOur engineers are working quickly to resolve the issue. Thank you for your patience.')
+
+1 Failed download:
+['BTC-USD']: RuntimeError('*** YAHOO! FINANCE IS CURRENTLY DOWN! ***\nOur engineers are working quickly to resolve the issue. Thank you for your patience.')
+2025-02-18 18:00:12.159990 Script triggered!
+2025-02-18 18:00:42.477479 Trade verification completed without errors.
+
+1 Failed download:
+['METR.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['VALO.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['AGRO.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['BOLT.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['CARC.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['NVDA.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['AMD.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['INTC.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['TSM.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['T.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['BTC-USD']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+2025-02-19 18:00:11.663775 Script triggered!
+2025-02-19 18:00:38.359099 Trade verification completed without errors.
+
+1 Failed download:
+['METR.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['VALO.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['AGRO.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['BOLT.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['CARC.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['NVDA.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['AMD.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['INTC.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['TSM.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['T.BA']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+
+1 Failed download:
+['BTC-USD']: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')
+2025-02-20 18:00:12.677683 Script triggered!
+2025-02-20 18:00:39.409270 Trade verification completed without errors.
+2025-03-22 18:00:12.978374 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-03-22 18:00:18.694003 Trade verification completed without errors.
+2025-03-29 18:00:12.163062 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-03-29 18:00:18.119494 Trade verification completed without errors.
+2025-03-30 18:00:12.933579 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-03-30 18:00:19.706443 Trade verification completed without errors.
+2025-04-06 18:00:12.463038 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-04-06 18:00:20.137329 Email sent successfully: VALO.BA
+2025-04-06 18:00:24.908446 Email sent successfully: TSM.BA
+2025-04-06 18:00:25.554070 Trade verification completed without errors.
+2025-04-06 18:00:25.558758 Alarms dataset updated successfully!
+2025-04-07 14:39:18.571039 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-04-07 14:39:24.748364 Email sent successfully: METR.BA
+2025-04-07 14:39:28.109012 Trade verification completed without errors.
+2025-04-07 14:39:28.113248 Alarms dataset updated successfully!
+2025-04-07 18:01:51.944605 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-04-07 18:01:54.996667 Trade verification completed without errors.
+2025-04-08 18:00:12.673857 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-04-08 18:00:20.586960 Email sent successfully: AMD.BA
+2025-04-08 18:00:21.852507 Trade verification completed without errors.
+2025-04-08 18:00:21.857195 Alarms dataset updated successfully!
+2025-04-13 18:00:14.308191 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-04-13 18:00:21.905065 Trade verification completed without errors.
+2025-04-15 18:00:12.335688 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-04-15 18:00:18.855541 Trade verification completed without errors.
+2025-04-18 18:00:12.974354 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-04-18 18:00:19.237719 Trade verification completed without errors.
+2025-04-20 18:00:12.299104 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-04-20 18:00:18.525535 Trade verification completed without errors.
+2025-04-26 18:00:13.090800 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-04-26 18:00:19.971363 Trade verification completed without errors.
+2025-04-29 18:00:12.083663 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-04-29 18:00:18.614684 Trade verification completed without errors.
+2025-05-02 18:00:12.481142 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-05-02 18:00:19.264641 Trade verification completed without errors.
+2025-05-03 18:00:12.699995 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-05-03 18:00:18.736876 Trade verification completed without errors.
+2025-05-04 18:00:12.325483 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-05-04 18:00:18.414061 Trade verification completed without errors.
+
+1 Failed download:
+['METR.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['VALO.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['AGRO.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['BOLT.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['CARC.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['NVDA.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['AMD.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['INTC.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['TSM.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['T.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['BTC-USD']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+2025-05-11 18:00:13.008428 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-05-11 18:00:43.764470 Trade verification completed without errors.
+2025-05-16 18:00:12.618099 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-05-16 18:00:19.336032 Trade verification completed without errors.
+2025-05-18 18:00:12.810678 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-05-18 18:00:19.681739 Trade verification completed without errors.
+2025-05-19 19:05:30.509873 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-05-19 19:05:36.720049 Trade verification completed without errors.
+
+1 Failed download:
+['METR.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['VALO.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['AGRO.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['BOLT.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['CARC.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['NVDA.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['AMD.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['INTC.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['TSM.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['T.BA']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+
+1 Failed download:
+['BTC-USD']: YFRateLimitError('Too Many Requests. Rate limited. Try after a while.')
+2025-05-19 19:07:09.829696 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-05-19 19:07:38.255545 Trade verification completed without errors.
+2025-05-23 18:00:12.464113 Script triggered!
+YF.download() has changed argument auto_adjust default to True
+2025-05-23 18:00:20.243707 Trade verification completed without errors.
+2025-05-24 18:00:12.609246 Script triggered!
+2025-05-24 18:00:19.525092 Trade verification completed without any errors.
+2025-05-26 21:57:03.285467 Script triggered!
+2025-05-26 21:57:10.386403 Trade verification completed without any errors.
+2025-06-03 18:00:12.374025 Script triggered!
+2025-06-03 18:00:23.912913 Trade verification completed without any errors.
+2025-06-06 21:41:03.764099 Script triggered!
+2025-06-06 21:41:13.624775 Email sent successfully: TSM.BA
+2025-06-06 21:41:14.586485 Trade verification completed without any errors.
+2025-06-06 21:41:14.590625 Alarms dataset updated successfully!
+2025-06-14 00:20:50.864843 Script triggered!
+2025-06-14 00:20:59.261116 Trade verification completed without any errors.
+2025-06-18 18:00:13.596922 Script triggered!
+2025-06-18 18:00:21.120456 Trade verification completed without any errors.
+2025-06-28 18:00:12.509336 Script triggered!
+2025-06-28 18:00:20.041032 Email sent successfully: NVDA.BA
+2025-06-28 18:00:22.752304 Email sent successfully: AMD.BA
+2025-06-28 18:00:24.380449 Trade verification completed without any errors.
+2025-06-28 18:00:24.384854 Alarms dataset updated successfully!
+2025-07-02 18:00:13.036175 Script triggered!
+2025-07-02 18:00:20.067140 Trade verification completed without any errors.
+2025-07-03 18:00:12.174509 Script triggered!
+2025-07-03 18:00:18.739465 Trade verification completed without any errors.
+2025-07-04 18:00:10.874159 Script triggered!
+2025-07-04 18:00:17.493018 Trade verification completed without any errors.
+2025-07-06 18:00:12.363592 Script triggered!
+2025-07-06 18:00:18.757682 Trade verification completed without any errors.
+2025-07-08 18:00:12.944898 Script triggered!
+2025-07-08 18:00:21.884408 Email sent successfully: INTC.BA
+2025-07-08 18:00:23.004821 Trade verification completed without any errors.
+2025-07-08 18:00:23.009046 Alarms dataset updated successfully!
+2025-07-09 18:00:12.477643 Script triggered!
+2025-07-09 18:00:19.027022 Trade verification completed without any errors.
+2025-07-12 18:00:12.491346 Script triggered!
+2025-07-12 18:00:19.629633 Trade verification completed without any errors.
+2025-07-15 18:00:13.452239 Script triggered!
+2025-07-15 18:00:22.124152 Email sent successfully: AMD.BA
+2025-07-15 18:00:23.977793 Trade verification completed without any errors.
+2025-07-15 18:00:23.982313 Alarms dataset updated successfully!
+2025-07-19 18:00:12.423857 Script triggered!
+2025-07-19 18:00:18.969703 Trade verification completed without any errors.
+2025-07-25 18:00:15.930098 Script triggered!
+2025-07-25 18:00:30.060239 Trade verification completed without any errors.
+2025-07-27 18:00:12.649054 Script triggered!
+2025-07-27 18:00:19.206189 Trade verification completed without any errors.
+2025-07-28 18:00:12.827918 Script triggered!
+2025-07-28 18:00:19.725105 Email sent successfully: AGRO.BA
+2025-07-28 18:00:24.185450 Email sent successfully: INTC.BA
+2025-07-28 18:00:27.232424 Email sent successfully: INTC.BA
+2025-07-28 18:00:28.570211 Trade verification completed without any errors.
+2025-07-28 18:00:28.578812 Alarms dataset updated successfully!
+2025-08-22 18:00:13.433853 Script triggered!
+2025-08-22 18:00:26.745413 Trade verification completed without any errors.
+2025-08-24 14:12:55.534286 Script triggered!
+2025-08-24 14:13:01.974053 Trade verification completed without any errors.
+2025-08-24 18:00:04.855734 Script triggered!
+2025-08-24 18:00:08.799934 Trade verification completed without any errors.
+2025-09-06 14:57:42.055230 Script triggered!
+2025-09-06 14:57:53.004379 Email sent successfully: BOLT.BA
+2025-09-06 14:57:58.470051 Trade verification completed without any errors.
+2025-09-06 14:57:58.485083 Alarms dataset updated successfully!
+2025-09-08 21:26:25.097707 Script triggered!
+2025-09-08 21:26:33.981997 Email sent successfully: METR.BA
+2025-09-08 21:26:39.150954 Email sent successfully: CARC.BA
+2025-09-08 21:26:44.344278 Trade verification completed without any errors.
+2025-09-08 21:26:44.361315 Alarms dataset updated successfully!
+2025-09-13 18:00:15.798485 Script triggered!
+2025-09-13 18:00:29.051181 Trade verification completed without any errors.
+2025-09-14 18:00:12.139705 Script triggered!
+2025-09-14 18:00:18.940298 Trade verification completed without any errors.
+2025-09-24 18:00:13.784769 Script triggered!
+2025-09-24 18:00:21.649739 Email sent successfully: METR.BA
+2025-09-24 18:00:25.072437 Email sent successfully: AGRO.BA
+2025-09-24 18:00:28.253531 Trade verification completed without any errors.
+2025-09-24 18:00:28.257734 Alarms dataset updated successfully!
+2025-10-29 21:07:21.723466 Script triggered!
+2025-10-29 21:07:29.602212 Email sent successfully: METR.BA
+2025-10-29 21:07:33.195668 Email sent successfully: VALO.BA
+2025-10-29 21:07:36.345692 Trade verification completed without any errors.
+2025-10-29 21:07:36.350033 Alarms dataset updated successfully!
+2025-10-31 18:00:11.826878 Script triggered!
+2025-10-31 18:00:18.833861 Trade verification completed without any errors.
+2025-11-03 18:00:13.625442 Script triggered!
+2025-11-03 18:00:21.258589 Email sent successfully: BOLT.BA
+2025-11-03 18:00:24.391699 Email sent successfully: CARC.BA
+2025-11-03 18:00:26.442641 Trade verification completed without any errors.
+2025-11-03 18:00:26.447173 Alarms dataset updated successfully!
+2025-11-09 18:00:14.582119 Script triggered!
+2025-11-09 18:00:26.838589 Trade verification completed without any errors.
+2025-11-21 18:00:14.327615 Script triggered!
+2025-11-21 18:00:21.965985 Trade verification completed without any errors.
+2025-12-02 18:00:13.224895 Script triggered!
+2025-12-02 18:00:20.555305 Trade verification completed without any errors.
+2025-12-03 18:00:11.976156 Script triggered!
+2025-12-03 18:00:18.927860 Trade verification completed without any errors.
+2025-12-04 18:00:13.585449 Script triggered!
+2025-12-04 18:00:21.062241 Email sent successfully: METR.BA
+2025-12-04 18:00:24.764392 Trade verification completed without any errors.
+2025-12-04 18:00:24.779193 Alarms dataset updated successfully!
+2025-12-06 18:00:14.010029 Script triggered!
+2025-12-06 18:00:21.533784 Trade verification completed without any errors.
+
+1 Failed download:
+['METR.BA']: YFPricesMissingError('possibly delisted; no price data found  (period=1d)')
+
+1 Failed download:
+['VALO.BA']: YFPricesMissingError('possibly delisted; no price data found  (period=1d)')
+
+1 Failed download:
+['AGRO.BA']: YFPricesMissingError('possibly delisted; no price data found  (period=1d)')
+
+1 Failed download:
+['BOLT.BA']: YFPricesMissingError('possibly delisted; no price data found  (period=1d)')
+
+1 Failed download:
+['CARC.BA']: YFPricesMissingError('possibly delisted; no price data found  (period=1d)')
+
+1 Failed download:
+['NVDA.BA']: YFPricesMissingError('possibly delisted; no price data found  (period=1d)')
+
+1 Failed download:
+['AMD.BA']: YFPricesMissingError('possibly delisted; no price data found  (period=1d)')
+
+1 Failed download:
+['INTC.BA']: YFPricesMissingError('possibly delisted; no price data found  (period=1d)')
+
+1 Failed download:
+['TSM.BA']: YFPricesMissingError('possibly delisted; no price data found  (period=1d)')
+
+1 Failed download:
+['T.BA']: YFPricesMissingError('possibly delisted; no price data found  (period=1d)')
+2025-12-08 18:00:14.665514 Script triggered!
+2025-12-08 18:00:22.456967 Trade verification completed without any errors.
+2025-12-13 18:00:14.595391 Script triggered!
+2025-12-13 18:00:23.061601 Trade verification completed without any errors.
+
+1 Failed download:
+['METR.BA']: DNSError('Failed to perform, curl: (6) Could not resolve host: query1.finance.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+
+1 Failed download:
+['VALO.BA']: DNSError('Failed to perform, curl: (6) Could not resolve host: query1.finance.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+
+1 Failed download:
+['AGRO.BA']: DNSError('Failed to perform, curl: (6) Could not resolve host: query1.finance.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+
+1 Failed download:
+['BOLT.BA']: DNSError('Failed to perform, curl: (6) Could not resolve host: query1.finance.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+
+1 Failed download:
+['CARC.BA']: DNSError('Failed to perform, curl: (6) Could not resolve host: query1.finance.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+
+1 Failed download:
+['NVDA.BA']: DNSError('Failed to perform, curl: (6) Could not resolve host: query1.finance.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+
+1 Failed download:
+['AMD.BA']: DNSError('Failed to perform, curl: (6) Could not resolve host: query1.finance.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+
+1 Failed download:
+['INTC.BA']: DNSError('Failed to perform, curl: (6) Could not resolve host: query1.finance.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+
+1 Failed download:
+['TSM.BA']: DNSError('Failed to perform, curl: (6) Could not resolve host: query1.finance.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+
+1 Failed download:
+['T.BA']: DNSError('Failed to perform, curl: (6) Could not resolve host: query1.finance.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+
+1 Failed download:
+['BTC-USD']: DNSError('Failed to perform, curl: (6) Could not resolve host: query1.finance.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+2025-12-17 18:00:18.427969 Script triggered!
+2025-12-17 18:00:22.849050 Trade verification completed without any errors.
+2025-12-18 18:00:14.680585 Script triggered!
+2025-12-18 18:00:22.803180 Trade verification completed without any errors.
+2025-12-24 18:00:13.205968 Script triggered!
+2025-12-24 18:00:20.185249 Trade verification completed without any errors.
+2025-12-27 18:01:34.147060 Script triggered!
+2025-12-27 18:01:41.639365 Trade verification completed without any errors.
+2025-12-29 18:00:52.351141 Script triggered!
+2025-12-29 18:00:59.249710 Email sent successfully: VALO.BA
+2025-12-29 18:01:02.010941 Email sent successfully: VALO.BA
+2025-12-29 18:01:05.060756 Trade verification completed without any errors.
+2025-12-29 18:01:05.065263 Alarms dataset updated successfully!
+2025-12-30 18:00:13.595439 Script triggered!
+2025-12-30 18:00:21.038840 Trade verification completed without any errors.
+2026-01-04 18:00:13.204485 Script triggered!
+2026-01-04 18:00:20.164343 Trade verification completed without any errors.
+2026-01-09 18:00:11.809475 Script triggered!
+2026-01-09 18:00:18.514775 Trade verification completed without any errors.
+2026-01-26 18:00:13.860357 Script triggered!
+2026-01-26 18:00:21.288462 Trade verification completed without any errors.
+2026-01-30 18:00:13.693533 Script triggered!
+2026-01-30 18:00:26.626220 Trade verification completed without any errors.
+2026-01-31 18:00:14.374754 Script triggered!
+2026-01-31 18:00:22.466389 Trade verification completed without any errors.
+2026-02-05 18:00:13.689580 Script triggered!
+2026-02-05 18:00:24.049718 Email sent successfully: BTC-USD
+2026-02-05 18:00:24.265781 Trade verification completed without any errors.
+2026-02-05 18:00:24.268772 Alarms dataset updated successfully!
+2026-02-06 18:00:12.023353 Script triggered!
+2026-02-06 18:00:19.477585 Trade verification completed without any errors.
+2026-02-15 18:00:15.313298 Script triggered!
+2026-02-15 18:00:23.143693 Trade verification completed without any errors.
+2026-02-17 18:00:15.828087 Script triggered!
+2026-02-17 18:00:23.586870 Trade verification completed without any errors.
+2026-02-21 18:00:14.693526 Script triggered!
+2026-02-21 18:00:21.840434 Trade verification completed without any errors.
+2026-02-23 18:00:13.627059 Script triggered!
+2026-02-23 18:00:21.126077 Trade verification completed without any errors.
+2026-02-24 18:00:12.713867 Script triggered!
+2026-02-24 18:00:20.268364 Trade verification completed without any errors.
+2026-02-26 18:00:13.442599 Script triggered!
+2026-02-26 18:00:20.597087 Trade verification completed without any errors.
+2026-02-28 18:00:16.016376 Script triggered!
+2026-02-28 18:00:23.662629 Trade verification completed without any errors.
+2026-03-01 18:00:12.116691 Script triggered!
+2026-03-01 18:00:19.311195 Trade verification completed without any errors.
+2026-03-02 18:00:13.196955 Script triggered!
+2026-03-02 18:00:20.104002 Trade verification completed without any errors.
+2026-03-04 18:00:13.779709 Script triggered!
+2026-03-04 18:00:20.723552 Trade verification completed without any errors.
+2026-03-06 18:00:12.771299 Script triggered!
+2026-03-06 18:00:19.561598 Trade verification completed without any errors.
+2026-03-07 18:00:13.915467 Script triggered!
+2026-03-07 18:00:20.824853 Trade verification completed without any errors.
+2026-03-10 18:00:12.442699 Script triggered!
+2026-03-10 18:00:18.869470 Trade verification completed without any errors.
+2026-03-12 18:00:13.150818 Script triggered!
+2026-03-12 18:00:19.657582 Trade verification completed without any errors.
+2026-03-16 18:00:14.063649 Script triggered!
+2026-03-16 18:00:20.898882 Trade verification completed without any errors.
+2026-03-17 18:00:12.765330 Script triggered!
+2026-03-17 18:00:19.513069 Trade verification completed without any errors.
+2026-03-23 18:00:13.369533 Script triggered!
+2026-03-23 18:00:22.196252 Email sent successfully: HL.BA
+2026-03-23 18:00:24.171631 Trade verification completed without any errors.
+2026-03-23 18:00:24.175800 Alarms dataset updated successfully!
+2026-03-26 18:00:13.222298 Script triggered!
+2026-03-26 18:00:20.241136 Trade verification completed without any errors.
+2026-03-28 18:00:15.923054 Script triggered!
+2026-03-28 18:00:23.473325 Email sent successfully: XLF.BA
+2026-03-28 18:00:26.441055 Trade verification completed without any errors.
+2026-03-28 18:00:26.445445 Alarms dataset updated successfully!
+2026-04-14 18:00:13.982403 Script triggered!
+2026-04-14 18:00:21.149464 Email sent successfully: INTC.BA
+2026-04-14 18:00:27.747744 Trade verification completed without any errors.
+2026-04-14 18:00:27.751982 Alarms dataset updated successfully!
+2026-04-15 18:00:13.761917 Script triggered!
+2026-04-15 18:00:20.605361 Trade verification completed without any errors.
+2026-04-19 18:00:13.708741 Script triggered!
+2026-04-19 18:00:20.655742 Email sent successfully: AMD.BA
+2026-04-19 18:00:23.294299 Trade verification completed without any errors.
+2026-04-19 18:00:23.298476 Alarms dataset updated successfully!
+2026-04-24 18:00:15.880909 Script triggered!
+2026-04-24 18:00:23.059791 Trade verification completed without any errors.
+2026-04-25 18:00:15.048134 Script triggered!
+2026-04-25 18:00:21.781282 Trade verification completed without any errors.
+2026-05-08 18:00:13.350866 Script triggered!
+2026-05-08 18:00:23.291726 Email sent successfully: VALO.BA
+2026-05-08 18:00:25.975978 Email sent successfully: VALO.BA
+2026-05-08 18:00:28.370537 Email sent successfully: VALO.BA
+2026-05-08 18:00:28.515935 Trade verification completed without any errors.
+2026-05-08 18:00:28.521294 Alarms dataset updated successfully!
+2026-05-12 18:00:15.376661 Script triggered!
+2026-05-12 18:00:23.067433 Trade verification completed without any errors.
+2026-05-13 18:00:15.614935 Script triggered!
+2026-05-13 18:00:26.047438 Email sent successfully: METR.BA
+2026-05-13 18:00:27.418499 Trade verification completed without any errors.
+2026-05-13 18:00:27.422674 Alarms dataset updated successfully!
+2026-05-19 18:00:14.116959 Script triggered!
+2026-05-19 18:00:22.470585 Trade verification completed without any errors.
+2026-05-31 18:00:14.540328 Script triggered!
+2026-05-31 18:00:22.263827 Trade verification completed without any errors.
+2026-06-02 18:00:15.249354 Script triggered!
+2026-06-02 18:00:22.342224 Trade verification completed without any errors.
+2026-06-07 18:00:13.113508 Script triggered!
+2026-06-07 18:00:19.744551 Trade verification completed without any errors.
+2026-06-12 18:00:14.793753 Script triggered!
+2026-06-12 18:00:23.697955 Email sent successfully: PYPL.BA
+2026-06-12 18:00:25.514108 Trade verification completed without any errors.
+2026-06-12 18:00:25.518410 Alarms dataset updated successfully!
+2026-06-26 18:00:14.598350 Script triggered!
+2026-06-26 18:00:18.298348 Email sent successfully: BTC-USD
+2026-06-26 18:00:25.889470 Email sent successfully: XLF.BA
+2026-06-26 18:00:29.707527 Trade verification completed without any errors.
+2026-06-26 18:00:30.133346 Alarms dataset updated successfully!
+2026-07-12 18:00:14.234000 Script triggered!
+2026-07-12 18:00:21.258851 Trade verification completed without any errors.
+2026-07-16 18:00:13.906195 Script triggered!
+2026-07-16 18:00:21.591281 Trade verification completed without any errors.
+2026-07-27 18:00:16.060760 Script triggered!
+2026-07-27 18:00:24.000991 Trade verification completed without any errors.
+2026-08-02 18:00:14.466193 Script triggered!
+2026-08-02 18:00:21.987309 Trade verification completed without any errors.

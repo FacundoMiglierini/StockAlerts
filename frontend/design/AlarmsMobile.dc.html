@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@600;700&display=swap">
+  <style>
+    :root {
+      --bg: oklch(19% 0.008 260); --surface: oklch(24% 0.009 260); --border: oklch(33% 0.012 260);
+      --text: oklch(94% 0.004 260); --text-muted: oklch(66% 0.01 260); --text-faint: oklch(50% 0.01 260);
+      --accent: oklch(64% 0.18 265); --accent-hover: oklch(70% 0.18 265); --accent-soft: oklch(28% 0.06 265); --accent-text: oklch(99% 0 0);
+      --active: oklch(66% 0.14 165); --active-soft: oklch(26% 0.05 165);
+      --triggered: oklch(68% 0.17 35); --triggered-soft: oklch(28% 0.07 35);
+      --disabled: oklch(62% 0 0); --disabled-soft: oklch(30% 0 0);
+      --danger: oklch(66% 0.18 25); --danger-soft: oklch(30% 0.06 25);
+      --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+      --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.35); --shadow-md: 0 4px 20px oklch(0% 0 0 / 0.5);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Public Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); text-decoration: none; }
+    .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+    button { font: inherit; cursor: pointer; }
+    .btn { padding: 0.6rem 0.9rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-weight: 600; font-size: 0.83rem; }
+    .btn-danger { color: var(--danger); border-color: var(--danger-soft); display: inline-flex; align-items: center; gap: 0.4rem; }
+    .btn-primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 700; }
+    .tag { font-size: 0.7rem; font-weight: 500; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 0.15rem 0.55rem; white-space: nowrap; }
+    .badge { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.22rem 0.6rem; border-radius: 999px; }
+    .badge-active { background: var(--active-soft); color: var(--active); }
+    .badge-triggered { background: var(--triggered-soft); color: var(--triggered); }
+    .badge-disabled { background: var(--disabled-soft); color: var(--disabled); }
+    .dot { width: 6px; height: 6px; border-radius: 999px; background: currentColor; display: inline-block; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+    .icon-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem; border: none; background: transparent; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: var(--bg); padding-bottom: 32px;">
+
+  <header style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); background: var(--surface);">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: var(--accent-soft); color: var(--accent);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="12" width="4" height="9" rx="1" fill="currentColor"/><rect x="10" y="7" width="4" height="14" rx="1" fill="currentColor"/><rect x="17" y="3" width="4" height="18" rx="1" fill="currentColor"/></svg>
+      </span>
+      <span style="font-weight: 800; font-size: 0.95rem;">Stock Alerts</span>
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted); margin-left: 0.35rem;"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </div>
+    <span class="icon-btn" style="padding: 0;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </span>
+  </header>
+
+  <main style="padding: 1.1rem; display: flex; flex-direction: column; gap: 1rem;">
+
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <h2 style="margin: 0; font-size: 1rem; font-weight: 700;">Your alarms</h2>
+      <span class="tag">4 alarms</span>
+    </div>
+
+    <button class="btn btn-primary" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New alarm
+    </button>
+
+    <!-- Filters: collapsed trigger + active-filter chips -->
+    <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+      <button class="btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; position: relative;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16l-6 8v6l-4 2v-8z"/></svg>
+        Filters
+        <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: var(--accent); color: var(--accent-text); font-size: 0.65rem; font-weight: 700;">2</span>
+      </button>
+      <div style="display: flex; gap: 0.5rem; overflow-x: auto;">
+        <span class="tag" style="background: var(--accent-soft); border-color: var(--accent); color: var(--accent); display: inline-flex; align-items: center; gap: 0.35rem;">
+          Market: USA
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </span>
+        <span class="tag" style="background: var(--accent-soft); border-color: var(--accent); color: var(--accent); display: inline-flex; align-items: center; gap: 0.35rem;">
+          Last 30 days
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </span>
+      </div>
+    </div>
+
+    <!-- ACTIVE card -->
+    <div class="card" style="padding: 1rem; display: flex; flex-direction: column; gap: 0.85rem;">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;">
+        <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span class="mono" style="font-size: 1.05rem; font-weight: 700;">AAPL</span>
+            <span class="tag">USA</span>
+          </div>
+          <span style="font-size: 0.78rem; color: var(--text-muted);">Manual price threshold</span>
+        </div>
+        <span class="badge badge-active"><span class="dot"></span>Active</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.5rem 0.65rem;">
+          <div style="font-size: 0.65rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.03em;">Trigger</div>
+          <div class="mono" style="font-size: 0.85rem; font-weight: 700;">US$150.00</div>
+        </div>
+        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.5rem 0.65rem;">
+          <div style="font-size: 0.65rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.03em;">Target</div>
+          <div class="mono" style="font-size: 0.85rem; font-weight: 700;">US$75.00</div>
+        </div>
+      </div>
+      <div style="border-top: 1px solid var(--border); padding-top: 0.7rem; display: flex; flex-direction: column; gap: 0.6rem;">
+        <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: var(--text-faint);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+          Not yet notified
+        </span>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn" style="flex: 1;">Disable</button>
+          <button class="btn btn-danger" style="flex: 1; justify-content: center;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRIGGERED card -->
+    <div class="card" style="padding: 1rem; display: flex; flex-direction: column; gap: 0.85rem; border-color: var(--triggered-soft);">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;">
+        <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span class="mono" style="font-size: 1.05rem; font-weight: 700;">GGAL</span>
+            <span class="tag">BYMA</span>
+          </div>
+          <span style="font-size: 0.78rem; color: var(--text-muted);">Support/resistance breakout</span>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
+          <span class="badge badge-triggered"><span class="dot"></span>Triggered</span>
+          <span style="font-size: 0.68rem; color: var(--text-faint);">Mar 5, 2026</span>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.5rem 0.65rem;">
+          <div style="font-size: 0.65rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.03em;">Lookback</div>
+          <div class="mono" style="font-size: 0.85rem; font-weight: 700;">180 days</div>
+        </div>
+        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.5rem 0.65rem;">
+          <div style="font-size: 0.65rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.03em;">Drawdown</div>
+          <div class="mono" style="font-size: 0.85rem; font-weight: 700;">10%</div>
+        </div>
+      </div>
+      <div style="border-top: 1px solid var(--border); padding-top: 0.7rem; display: flex; flex-direction: column; gap: 0.6rem;">
+        <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: var(--active);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8.5 12.5 11 15 15.5 9.5"/></svg>
+          Notified once
+        </span>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn" style="flex: 1;">Re-arm</button>
+          <button class="btn btn-danger" style="flex: 1; justify-content: center;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISABLED card -->
+    <div class="card" style="padding: 1rem; display: flex; flex-direction: column; gap: 0.85rem; opacity: 0.7;">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;">
+        <div style="display: flex; flex-direction: column; gap: 0.3rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span class="mono" style="font-size: 1.05rem; font-weight: 700;">BTC-USD</span>
+            <span class="tag">Crypto</span>
+          </div>
+          <span style="font-size: 0.78rem; color: var(--text-muted);">RSI overbought/oversold</span>
+        </div>
+        <span class="badge badge-disabled"><span class="dot"></span>Disabled</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.5rem 0.65rem;">
+          <div style="font-size: 0.65rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.03em;">Oversold</div>
+          <div class="mono" style="font-size: 0.85rem; font-weight: 700;">30</div>
+        </div>
+        <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.5rem 0.65rem;">
+          <div style="font-size: 0.65rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.03em;">Overbought</div>
+          <div class="mono" style="font-size: 0.85rem; font-weight: 700;">70</div>
+        </div>
+      </div>
+      <div style="border-top: 1px solid var(--border); padding-top: 0.7rem; display: flex; flex-direction: column; gap: 0.6rem;">
+        <span style="font-size: 0.75rem; color: var(--text-faint);">Not yet notified</span>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn" style="flex: 1;">Enable</button>
+          <button class="btn btn-danger" style="flex: 1; justify-content: center;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</x-dc>
+</body>
+</html>
