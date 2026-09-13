@@ -1,0 +1,174 @@
+// Prisma schema for the backend service.
+// The worker (Python) reads/writes the same tables directly via SQL/SQLAlchemy —
+// this schema is the source of truth for migrations, applied via `prisma migrate`.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum StrategyType {
+  MANUAL_THRESHOLD
+  SMA_CROSSOVER
+  RSI
+  MACD
+  BOLLINGER
+  SUPPORT_RESISTANCE
+}
+
+enum AlarmStatus {
+  ACTIVE
+  TRIGGERED
+  DISABLED
+}
+
+// Mirrors the original script's notified flag (0/1/2), named to match
+// AlarmStatus's convention. NOT_NOTIFIED is the default; NOTIFIED_TWICE
+// only ever applies to MANUAL_THRESHOLD's two-phase (BUY then SELL) flow —
+// every other strategy is single-shot and stops at NOTIFIED_ONCE.
+enum NotificationStatus {
+  NOT_NOTIFIED
+  NOTIFIED_ONCE
+  NOTIFIED_TWICE
+}
+
+// Closed set by design (same convention as StrategyType): a channel needs
+// worker-side support (a Notifier implementation) to be useful, so adding
+// one is already a code change — the enum just keeps it type-safe too.
+enum NotificationChannelType {
+  TELEGRAM
+}
+
+// The exchange/asset class an alarm's ticker trades on — determines both
+// the currency its trigger/target prices are denominated in (USA/CRYPTO
+// -> USD, BYMA -> ARS) and how the worker's PriceProvider resolves the
+// ticker (see worker/worker/market.py), since the same raw ticker string
+// can mean different securities on different markets (e.g. a US-listed ADR
+// vs. a same-named company or CEDEAR listed on BYMA in Buenos Aires). USA
+// covers any US-listed ticker needing no yfinance suffix — NASDAQ, NYSE,
+// S&P 500 constituents, ETFs — they all resolve the same way. BYMA covers
+// both CEDEARs (depositary receipts of foreign stocks) and local Argentine
+// shares (e.g. the Merval index's constituents) — both trade in ARS and
+// resolve the same way, so one market value covers both.
+enum Market {
+  USA
+  CRYPTO
+  BYMA
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  // Admin-controlled kill switch, distinct from a user disabling their own
+  // alarms — checked at login (auth.service.ts) and on every authenticated
+  // request (jwt.strategy.ts) so revoking access takes effect immediately,
+  // not just for future logins.
+  active       Boolean  @default(true)
+  // Set only on the account the seed script creates (prisma/seed.ts). Other
+  // admins can never disable/delete this account — UsersService.setActive()
+  // and .remove() both check this flag, in addition to the existing
+  // can't-act-on-yourself check — so there's always at least one admin who
+  // can recover the system if every other admin gets disabled by mistake.
+  isDefaultAdmin Boolean @default(false)
+  createdAt    DateTime @default(now())
+
+  alarms          Alarm[]
+  channels        NotificationChannel[]
+  resetTokens     PasswordResetToken[]
+
+  @@map("users")
+}
+
+// An optional notification channel a user has linked, beyond the email
+// that's always sent (email lives on User directly since every account has
+// exactly one, non-optionally). Linked via PUT /users/me/channels/:type,
+// unlinked via DELETE — see backend/CLAUDE.md and worker/CLAUDE.md for the
+// Telegram linking steps specifically.
+model NotificationChannel {
+  id         String                  @id @default(uuid())
+  userId     String
+  user       User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       NotificationChannelType
+  // Channel-specific address: a Telegram chat id today: whatever the next
+  // channel's addressing scheme needs, but always a String, since that's
+  // representable by every channel Telegram/Discord/WhatsApp/etc. would use.
+  externalId String
+  createdAt  DateTime                @default(now())
+
+  @@unique([userId, type])
+  @@map("notification_channels")
+}
+
+// A user's configured instance of a strategy, scoped to one ticker.
+// `params` shape depends on `strategyType` — validated in the backend
+// against that strategy's schema before it ever reaches the database.
+model Alarm {
+  id                 String             @id @default(uuid())
+  userId             String
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticker             String
+  strategyType       StrategyType
+  market             Market             @default(USA)
+  params             Json
+  status             AlarmStatus        @default(ACTIVE)
+  notificationStatus NotificationStatus @default(NOT_NOTIFIED)
+  triggeredAt        DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([status, ticker])
+  @@map("alarms")
+}
+
+// A single-use, short-lived token for the "forgot password" flow. Only
+// `tokenHash` (sha256 of the random token emailed to the user) is stored —
+// never the plaintext token — so a database read alone can't be used to
+// reset someone's password. `usedAt` is set on redemption instead of
+// deleting the row, so a reused/expired link gets a clear error rather
+// than "token not found".
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+// An admin's invitation for someone to join, by email + intended role. Only
+// `tokenHash` (sha256 of the emailed token) is stored, same rationale as
+// PasswordResetToken. No relation to User: the invitee doesn't have an
+// account yet (that's the point — accepting one creates it), and
+// `invitedByEmail` is a snapshot rather than a FK so the invitation stays
+// meaningful even if the inviting admin is later removed. `acceptedAt` is
+// set on redemption instead of deleting the row, mirroring
+// PasswordResetToken's usedAt.
+model UserInvitation {
+  id             String    @id @default(uuid())
+  email          String
+  role           Role
+  tokenHash      String    @unique
+  invitedByEmail String
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([email])
+  @@map("user_invitations")
+}

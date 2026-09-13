@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@600;700&display=swap">
+  <style>
+    :root {
+      --bg: oklch(19% 0.008 260); --surface: oklch(24% 0.009 260); --border: oklch(33% 0.012 260);
+      --text: oklch(94% 0.004 260); --text-muted: oklch(66% 0.01 260); --text-faint: oklch(50% 0.01 260);
+      --accent: oklch(64% 0.18 265); --accent-hover: oklch(70% 0.18 265); --accent-soft: oklch(28% 0.06 265); --accent-text: oklch(99% 0 0);
+      --active: oklch(66% 0.14 165); --active-soft: oklch(26% 0.05 165);
+      --danger: oklch(66% 0.18 25); --danger-soft: oklch(30% 0.06 25);
+      --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+      --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.35); --shadow-md: 0 4px 20px oklch(0% 0 0 / 0.5);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Public Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); text-decoration: none; }
+    label { display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+    input { padding: 0.55rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg); color: var(--text); font-size: 0.9rem; width: 100%; font: inherit; }
+    button { font: inherit; cursor: pointer; }
+    .btn-primary { width: 100%; padding: 0.7rem 1.1rem; border-radius: var(--radius-sm); background: var(--accent); color: var(--accent-text); border: 1px solid var(--accent); font-weight: 700; font-size: 0.85rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 1.5rem; }
+    .stage-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint); margin-bottom: 0.6rem; }
+  </style>
+</helmet>
+
+<div style="min-height: 100%; background: var(--bg); padding: 40px 0 60px; display: flex; flex-direction: column; align-items: center; gap: 56px;">
+
+  <!-- STATE 1: Login with Forgot password link -->
+  <div style="width: 360px;">
+    <div class="stage-label">1 &middot; Sign in</div>
+    <div class="card" style="display: flex; flex-direction: column; gap: 1.1rem;">
+      <div style="display: flex; align-items: center; gap: 0.7rem;">
+        <span style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--accent-soft); color: var(--accent);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="12" width="4" height="9" rx="1" fill="currentColor"/><rect x="10" y="7" width="4" height="14" rx="1" fill="currentColor"/><rect x="17" y="3" width="4" height="18" rx="1" fill="currentColor"/></svg>
+        </span>
+        <div>
+          <h1 style="margin: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em;">Stock Alerts</h1>
+          <p style="margin: 0; font-size: 0.875rem; color: var(--text-muted);">Sign in to manage your price alerts.</p>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 1.1rem;">
+        <label>Email<input placeholder="you@example.com"></label>
+        <div>
+          <label style="margin-bottom: 0.4rem;">Password<input type="password"></label>
+          <div style="text-align: right; margin-top: 0.5rem;">
+            <a href="#" style="font-size: 0.8rem; font-weight: 600;">Forgot password?</a>
+          </div>
+        </div>
+        <button class="btn-primary">Sign in</button>
+      </div>
+      <p style="margin: 0; font-size: 0.78rem; text-align: center; color: var(--text-muted);">Accounts are created by an admin — there's no self-signup.</p>
+    </div>
+  </div>
+
+  <!-- STATE 2: Request reset -->
+  <div style="width: 360px;">
+    <div class="stage-label">2 &middot; Request reset</div>
+    <div class="card" style="display: flex; flex-direction: column; gap: 1.1rem;">
+      <div style="display: flex; align-items: center; gap: 0.7rem;">
+        <span style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--accent-soft); color: var(--accent);">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg>
+        </span>
+        <div>
+          <h1 style="margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em;">Reset your password</h1>
+          <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">We'll email you a link to set a new one.</p>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 1.1rem;">
+        <label>Email<input placeholder="you@example.com"></label>
+        <button class="btn-primary">Send reset link</button>
+      </div>
+      <a href="#" style="font-size: 0.8rem; font-weight: 600; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to sign in
+      </a>
+    </div>
+  </div>
+
+  <!-- STATE 3: Check your email -->
+  <div style="width: 360px;">
+    <div class="stage-label">3 &middot; Check your email</div>
+    <div class="card" style="display: flex; flex-direction: column; align-items: center; gap: 1rem; text-align: center;">
+      <span style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 999px; background: var(--active-soft); color: var(--active);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8.5 12.5 11 15 15.5 9.5"/></svg>
+      </span>
+      <div>
+        <h1 style="margin: 0 0 0.4rem; font-size: 1.1rem; font-weight: 800;">Check your inbox</h1>
+        <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted); max-width: 280px;">If an account exists for that email, we've sent a link to reset the password. The link expires in 1 hour.</p>
+      </div>
+      <a href="#" style="font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to sign in
+      </a>
+    </div>
+  </div>
+
+  <!-- STATE 4: Set new password -->
+  <div style="width: 360px;">
+    <div class="stage-label">4 &middot; Set new password (from emailed link)</div>
+    <div class="card" style="display: flex; flex-direction: column; gap: 1.1rem;">
+      <div style="display: flex; align-items: center; gap: 0.7rem;">
+        <span style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--accent-soft); color: var(--accent);">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        </span>
+        <div>
+          <h1 style="margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em;">Choose a new password</h1>
+          <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">For admin@example.com</p>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 1.1rem;">
+        <label>
+          New password
+          <div style="position: relative;">
+            <input type="password" style="padding-right: 2.4rem;">
+            <span style="position: absolute; right: 0.65rem; top: 50%; transform: translateY(-50%); color: var(--text-faint); display: flex;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
+          </div>
+        </label>
+        <label style="font-size: 0.75rem; color: var(--text-faint); font-weight: 400; margin-top: -0.7rem;">At least 8 characters.</label>
+        <label>Confirm password<input type="password"></label>
+        <button class="btn-primary">Update password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE 5: Accept invite -->
+  <div style="width: 360px;">
+    <div class="stage-label">5 &middot; Accept invite (from emailed link)</div>
+    <div class="card" style="display: flex; flex-direction: column; gap: 1.1rem;">
+      <div style="display: flex; align-items: center; gap: 0.7rem;">
+        <span style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--accent-soft); color: var(--accent);">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+        </span>
+        <div>
+          <h1 style="margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em;">You've been invited</h1>
+          <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Set a password to join as an Admin.</p>
+        </div>
+      </div>
+      <div style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.6rem 0.85rem; font-size: 0.85rem; color: var(--text-muted);">
+        <strong style="color: var(--text);">teammate@example.com</strong>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 1.1rem;">
+        <label>New password<input type="password"></label>
+        <label style="font-size: 0.75rem; color: var(--text-faint); font-weight: 400; margin-top: -0.7rem;">At least 8 characters.</label>
+        <label>Confirm password<input type="password"></label>
+        <button class="btn-primary">Activate account</button>
+      </div>
+      <p style="margin: 0; font-size: 0.75rem; text-align: center; color: var(--text-faint);">This invite link expires in 1 hour.</p>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

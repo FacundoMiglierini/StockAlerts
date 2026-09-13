@@ -1,0 +1,17 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1450 },
+    { "file": "AdminDesktop.dc.html", "x": 1560, "y": 0, "w": 1440, "h": 950 },
+    { "file": "AdminInvite.dc.html", "x": 3080, "y": 0, "w": 1120, "h": 780 },
+    { "file": "Settings.dc.html", "x": 4280, "y": 0, "w": 1440, "h": 900 },
+    { "file": "AlarmsMobile.dc.html", "x": 0, "y": 1600, "w": 390, "h": 1900 },
+    { "file": "AdminMobile.dc.html", "x": 500, "y": 1600, "w": 390, "h": 1050 },
+    { "file": "CreateAlarmMobile.dc.html", "x": 1000, "y": 1600, "w": 390, "h": 700 },
+    { "file": "AuthFlow.dc.html", "x": 1500, "y": 1600, "w": 420, "h": 2400 }
+  ],
+  "annotations": [
+    { "id": "brief-summary", "x": 0, "y": -160, "w": 460, "text": "Stock Alerts — visual direction\n\nDark-mode-first: Public Sans + IBM Plex Mono (tickers), oklch blue-violet accent, calm/alert/muted status system for Active/Triggered/Disabled.\n\n2026-09-13 update: redesigned alarm cards, an alarm filters bar, an admin users tab, the password-recovery flow, and (latest) a theme picker on Settings and an admin invite flow (invite modal + email-link account activation)." },
+    { "id": "invite-assumption", "x": 3080, "y": -160, "w": 460, "text": "Assumption to confirm: \"invite\" = the admin only enters email + role; the invitee gets an emailed link to set their own password (reusing the password-reset token/mailer infra), rather than the admin choosing a password for them. Say if you'd rather the admin set an initial password directly instead." }
+  ],
+  "launch": { "view": "canvas" }
+}

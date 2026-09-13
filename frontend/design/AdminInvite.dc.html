@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@600;700&display=swap">
+  <style>
+    :root {
+      --bg: oklch(19% 0.008 260); --surface: oklch(24% 0.009 260); --border: oklch(33% 0.012 260);
+      --text: oklch(94% 0.004 260); --text-muted: oklch(66% 0.01 260); --text-faint: oklch(50% 0.01 260);
+      --accent: oklch(64% 0.18 265); --accent-hover: oklch(70% 0.18 265); --accent-soft: oklch(28% 0.06 265); --accent-text: oklch(99% 0 0);
+      --active: oklch(66% 0.14 165); --active-soft: oklch(26% 0.05 165);
+      --disabled: oklch(62% 0 0); --disabled-soft: oklch(30% 0 0);
+      --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+      --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.35); --shadow-md: 0 4px 20px oklch(0% 0 0 / 0.5);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Public Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    .mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+    button { font: inherit; cursor: pointer; }
+    label { display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+    input, select { padding: 0.55rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg); color: var(--text); font-size: 0.9rem; width: 100%; font: inherit; }
+    .btn-primary { width: 100%; padding: 0.7rem 1.1rem; border-radius: var(--radius-sm); background: var(--accent); color: var(--accent-text); border: 1px solid var(--accent); font-weight: 700; font-size: 0.85rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 1.5rem; }
+    .tag { font-size: 0.72rem; font-weight: 500; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 0.15rem 0.6rem; }
+    .role-option { flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.55rem; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 0.85rem; font-weight: 600; color: var(--text); background: var(--bg); cursor: pointer; }
+    .role-option.is-active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  </style>
+</helmet>
+
+<div style="width: 1120px; min-height: 760px; background: var(--bg); position: relative;">
+
+  <!-- Dimmed admin page behind the modal, for context -->
+  <div style="padding: 2rem; opacity: 0.4; filter: blur(1px);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+      <h2 style="margin: 0; font-size: 1.05rem; font-weight: 700;">Users</h2>
+      <span class="tag">6 users</span>
+    </div>
+    <div class="card" style="height: 400px;"></div>
+  </div>
+
+  <!-- Overlay -->
+  <div style="position: absolute; inset: 0; background: oklch(0% 0 0 / 0.5); display: flex; align-items: center; justify-content: center;">
+    <div class="card" style="width: 420px; display: flex; flex-direction: column; gap: 1.1rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h2 style="margin: 0; font-size: 1.05rem; font-weight: 700;">Invite someone</h2>
+        <button type="button" style="font-size: 1.3rem; line-height: 1; padding: 0.2rem 0.5rem; border: none; background: transparent; color: var(--text-muted);">&times;</button>
+      </div>
+
+      <form style="display: flex; flex-direction: column; gap: 1.1rem;">
+        <label>
+          Email
+          <input placeholder="teammate@example.com" />
+        </label>
+
+        <label>
+          Role
+          <div style="display: flex; gap: 0.6rem;">
+            <div class="role-option is-active">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              User
+            </div>
+            <div class="role-option">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
+              Admin
+            </div>
+          </div>
+        </label>
+
+        <p style="margin: 0; font-size: 0.78rem; color: var(--text-faint); line-height: 1.5;">
+          They'll get an email with a link to set their own password and activate the account. The link expires in 1 hour — you'll be able to send another if it lapses.
+        </p>
+
+        <button type="submit" class="btn-primary">Send invite</button>
+      </form>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
