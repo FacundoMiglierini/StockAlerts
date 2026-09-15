@@ -7,7 +7,11 @@ import { NotificationChannelsModule } from '../notification-channels/notificatio
 import { MailerModule } from '../../common/mailer/mailer.module.js';
 
 @Module({
-  imports: [PassportModule.register({ defaultStrategy: 'jwt' }), NotificationChannelsModule, MailerModule],
+  imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    NotificationChannelsModule,
+    MailerModule,
+  ],
   providers: [UsersService, InvitationService],
   controllers: [UsersController],
   // InvitationService is exported so AuthModule (which already imports

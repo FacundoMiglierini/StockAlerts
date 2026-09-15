@@ -10,8 +10,12 @@ class TestFetchActiveAlarmsBySymbol:
         insert_alarm(engine, user_id=user_id, ticker="AAPL", status=AlarmStatus.ACTIVE)
         insert_alarm(engine, user_id=user_id, ticker="AAPL", status=AlarmStatus.ACTIVE)
         insert_alarm(engine, user_id=user_id, ticker="MSFT", status=AlarmStatus.ACTIVE)
-        insert_alarm(engine, user_id=user_id, ticker="GOOGL", status=AlarmStatus.TRIGGERED)
-        insert_alarm(engine, user_id=user_id, ticker="TSLA", status=AlarmStatus.DISABLED)
+        insert_alarm(
+            engine, user_id=user_id, ticker="GOOGL", status=AlarmStatus.TRIGGERED
+        )
+        insert_alarm(
+            engine, user_id=user_id, ticker="TSLA", status=AlarmStatus.DISABLED
+        )
 
         grouped = db.fetch_active_alarms_by_symbol()
 
@@ -19,7 +23,9 @@ class TestFetchActiveAlarmsBySymbol:
         assert len(grouped["AAPL"]) == 2
         assert len(grouped["MSFT"]) == 1
 
-    def test_same_ticker_on_different_markets_resolves_to_different_symbols(self, engine):
+    def test_same_ticker_on_different_markets_resolves_to_different_symbols(
+        self, engine
+    ):
         # A US-listed ADR and a same-named company or CEDEAR listed on BYMA can
         # share a raw ticker — they must never be grouped (and therefore
         # price-fetched) together.
@@ -65,11 +71,16 @@ class TestApplyAlarmResult:
     def test_updates_notified_and_status(self, engine):
         user_id = insert_user(engine)
         alarm_id = insert_alarm(
-            engine, user_id=user_id, status=AlarmStatus.ACTIVE, notification_status=NotificationStatus.NOT_NOTIFIED
+            engine,
+            user_id=user_id,
+            status=AlarmStatus.ACTIVE,
+            notification_status=NotificationStatus.NOT_NOTIFIED,
         )
 
         db.apply_alarm_result(
-            alarm_id, notification_status=NotificationStatus.NOTIFIED_ONCE, status=AlarmStatus.ACTIVE
+            alarm_id,
+            notification_status=NotificationStatus.NOTIFIED_ONCE,
+            status=AlarmStatus.ACTIVE,
         )
 
         row = fetch_alarm_row(engine, alarm_id)
@@ -80,11 +91,16 @@ class TestApplyAlarmResult:
     def test_sets_triggered_at_when_status_becomes_triggered(self, engine):
         user_id = insert_user(engine)
         alarm_id = insert_alarm(
-            engine, user_id=user_id, status=AlarmStatus.ACTIVE, notification_status=NotificationStatus.NOTIFIED_ONCE
+            engine,
+            user_id=user_id,
+            status=AlarmStatus.ACTIVE,
+            notification_status=NotificationStatus.NOTIFIED_ONCE,
         )
 
         db.apply_alarm_result(
-            alarm_id, notification_status=NotificationStatus.NOTIFIED_TWICE, status=AlarmStatus.TRIGGERED
+            alarm_id,
+            notification_status=NotificationStatus.NOTIFIED_TWICE,
+            status=AlarmStatus.TRIGGERED,
         )
 
         row = fetch_alarm_row(engine, alarm_id)
@@ -102,7 +118,9 @@ class TestApplyAlarmResult:
         )
 
         db.apply_alarm_result(
-            alarm_id, notification_status=NotificationStatus.NOTIFIED_TWICE, status=AlarmStatus.TRIGGERED
+            alarm_id,
+            notification_status=NotificationStatus.NOTIFIED_TWICE,
+            status=AlarmStatus.TRIGGERED,
         )
 
         assert db.fetch_active_alarms_by_symbol() == {}
@@ -111,7 +129,9 @@ class TestApplyAlarmResult:
 class TestFetchUserContact:
     def test_returns_email_and_linked_channels(self, engine):
         user_id = insert_user(engine, email="a@b.com")
-        insert_channel(engine, user_id=user_id, channel_type="TELEGRAM", external_id="999")
+        insert_channel(
+            engine, user_id=user_id, channel_type="TELEGRAM", external_id="999"
+        )
 
         contact = db.fetch_user_contact(user_id)
 

@@ -60,14 +60,12 @@ def fetch_active_alarms_by_symbol() -> dict[str, list[Alarm]]:
     across markets (e.g. a US-listed ADR and a same-named company or CEDEAR
     listed on BYMA).
     """
-    query = text(
-        f"""
+    query = text(f"""
         SELECT id, "userId", ticker, "strategyType"::text AS "strategyType", params,
                "notificationStatus"::text AS "notificationStatus", market::text AS market
         FROM alarms
         WHERE status::text = '{AlarmStatus.ACTIVE}'
-        """
-    )
+        """)
     grouped: dict[str, list[Alarm]] = defaultdict(list)
     with get_engine().connect() as conn:
         for row in conn.execute(query).mappings():
@@ -106,18 +104,18 @@ def fetch_user_contact(user_id: str) -> UserContact | None:
     return UserContact(email=user_row[0], channels=channels)
 
 
-def apply_alarm_result(alarm_id: str, *, notification_status: NotificationStatus, status: AlarmStatus) -> None:
+def apply_alarm_result(
+    alarm_id: str, *, notification_status: NotificationStatus, status: AlarmStatus
+) -> None:
     """Persist a strategy evaluation's outcome: new notification status and alarm status."""
-    query = text(
-        f"""
+    query = text(f"""
         UPDATE alarms
         SET "notificationStatus" = CAST(:notification_status AS "NotificationStatus"),
             status = CAST(:status AS "AlarmStatus"),
             "triggeredAt" = CASE WHEN :status = '{AlarmStatus.TRIGGERED}' THEN :triggered_at ELSE "triggeredAt" END,
             "updatedAt" = :updated_at
         WHERE id = :id
-        """
-    )
+        """)
     now = datetime.now(timezone.utc)
     with get_engine().begin() as conn:
         conn.execute(

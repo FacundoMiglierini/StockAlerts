@@ -38,7 +38,10 @@ export const strategyParamsSchemas = {
   }),
 } as const satisfies Record<StrategyType, z.ZodTypeAny>;
 
-export function parseStrategyParams(strategyType: StrategyType, params: unknown) {
+export function parseStrategyParams(
+  strategyType: StrategyType,
+  params: unknown,
+) {
   const schema = strategyParamsSchemas[strategyType];
   const result = schema.safeParse(params);
   if (!result.success) {

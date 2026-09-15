@@ -25,7 +25,9 @@ describe('Alarms (e2e)', () => {
   });
 
   async function login(email: string): Promise<string> {
-    const res = await request(app.getHttpServer()).post('/auth/login').send({ email, password: PASSWORD });
+    const res = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email, password: PASSWORD });
     return res.body.accessToken;
   }
 
@@ -54,7 +56,11 @@ describe('Alarms (e2e)', () => {
     const res = await request(app.getHttpServer())
       .post('/alarms')
       .set('Authorization', `Bearer ${tokenA}`)
-      .send({ ticker: '  aapl ', strategyType: 'MANUAL_THRESHOLD', params: { trigger: 100, target: 200 } })
+      .send({
+        ticker: '  aapl ',
+        strategyType: 'MANUAL_THRESHOLD',
+        params: { trigger: 100, target: 200 },
+      })
       .expect(201);
 
     expect(res.body.ticker).toBe('AAPL');
@@ -85,7 +91,9 @@ describe('Alarms (e2e)', () => {
       .send({ ticker: 'AAPL', strategyType: 'RSI', params: { period: -1 } })
       .expect(400);
 
-    const res = await request(app.getHttpServer()).get('/alarms').set('Authorization', `Bearer ${tokenA}`);
+    const res = await request(app.getHttpServer())
+      .get('/alarms')
+      .set('Authorization', `Bearer ${tokenA}`);
     expect(res.body).toHaveLength(0);
   });
 
@@ -120,7 +128,9 @@ describe('Alarms (e2e)', () => {
       .send({ status: 'DISABLED' })
       .expect(404);
 
-    const stillActive = await prisma.alarm.findUniqueOrThrow({ where: { id: alarm.id } });
+    const stillActive = await prisma.alarm.findUniqueOrThrow({
+      where: { id: alarm.id },
+    });
     expect(stillActive.status).toBe('ACTIVE');
   });
 
@@ -132,7 +142,9 @@ describe('Alarms (e2e)', () => {
       .set('Authorization', `Bearer ${tokenA}`)
       .expect(404);
 
-    const stillThere = await prisma.alarm.findUnique({ where: { id: alarm.id } });
+    const stillThere = await prisma.alarm.findUnique({
+      where: { id: alarm.id },
+    });
     expect(stillThere).not.toBeNull();
   });
 
@@ -145,7 +157,11 @@ describe('Alarms (e2e)', () => {
       .send({ params: { period: 21 } })
       .expect(200);
 
-    expect(res.body.params).toEqual({ period: 21, oversold: 30, overbought: 70 });
+    expect(res.body.params).toEqual({
+      period: 21,
+      oversold: 30,
+      overbought: 70,
+    });
   });
 
   it('deletes an alarm the caller owns', async () => {

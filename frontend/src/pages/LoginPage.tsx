@@ -1,45 +1,45 @@
-import { useState } from 'react'
-import type { SubmitEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
-import { ApiError } from '../api/client'
-import { LogoMark } from '../components/icons'
-import { useToast } from '../components/Toast'
-import { isValidEmail } from '../validation'
+import { useState } from 'react';
+import type { SubmitEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { ApiError } from '../api/client';
+import { LogoMark } from '../components/icons';
+import { useToast } from '../components/Toast';
+import { isValidEmail } from '../validation';
 
 export function LoginPage() {
-  const { login } = useAuth()
-  const navigate = useNavigate()
-  const { showSuccess, showError } = useToast()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const { showSuccess, showError } = useToast();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(event: SubmitEvent) {
-    event.preventDefault()
-    setError(null)
+    event.preventDefault();
+    setError(null);
 
     if (!isValidEmail(email)) {
-      setError('Enter a valid email address')
-      return
+      setError('Enter a valid email address');
+      return;
     }
     if (!password) {
-      setError('Password is required')
-      return
+      setError('Password is required');
+      return;
     }
 
-    setSubmitting(true)
+    setSubmitting(true);
     try {
-      await login(email, password)
-      showSuccess('Signed in.')
-      navigate('/alarms')
+      await login(email, password);
+      showSuccess('Signed in.');
+      navigate('/alarms');
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Login failed'
-      setError(message)
-      showError(message)
+      const message = err instanceof ApiError ? err.message : 'Login failed';
+      setError(message);
+      showError(message);
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
@@ -52,7 +52,9 @@ export function LoginPage() {
           </span>
           <div>
             <h1 className="login-title">Stock Alerts</h1>
-            <p className="text-muted login-tagline">Sign in to manage your price alerts.</p>
+            <p className="text-muted login-tagline">
+              Sign in to manage your price alerts.
+            </p>
           </div>
         </div>
 
@@ -88,8 +90,10 @@ export function LoginPage() {
           </button>
         </form>
 
-        <p className="text-muted login-footnote">Accounts are created by an admin — there's no self-signup.</p>
+        <p className="text-muted login-footnote">
+          Accounts are created by an admin — there's no self-signup.
+        </p>
       </div>
     </div>
-  )
+  );
 }

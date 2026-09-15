@@ -1,23 +1,23 @@
-import { createContext, use, useCallback, useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
+import { createContext, use, useCallback, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 
-export type ThemePreference = 'system' | 'light' | 'dark'
+export type ThemePreference = 'system' | 'light' | 'dark';
 
-const STORAGE_KEY = 'stock-alerts:theme'
+const STORAGE_KEY = 'stock-alerts:theme';
 
 interface ThemeContextValue {
-  theme: ThemePreference
-  setTheme: (theme: ThemePreference) => void
+  theme: ThemePreference;
+  setTheme: (theme: ThemePreference) => void;
 }
 
-const ThemeContext = createContext<ThemeContextValue | null>(null)
+const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function readStoredTheme(): ThemePreference {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    return stored === 'light' || stored === 'dark' ? stored : 'system'
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored === 'light' || stored === 'dark' ? stored : 'system';
   } catch {
-    return 'system'
+    return 'system';
   }
 }
 
@@ -27,40 +27,40 @@ function readStoredTheme(): ThemePreference {
 // (initial state already matches what that script applied).
 function applyTheme(theme: ThemePreference) {
   if (theme === 'system') {
-    document.documentElement.removeAttribute('data-theme')
+    document.documentElement.removeAttribute('data-theme');
   } else {
-    document.documentElement.setAttribute('data-theme', theme)
+    document.documentElement.setAttribute('data-theme', theme);
   }
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemePreference>(readStoredTheme)
+  const [theme, setThemeState] = useState<ThemePreference>(readStoredTheme);
 
   useEffect(() => {
-    applyTheme(theme)
-  }, [theme])
+    applyTheme(theme);
+  }, [theme]);
 
   const setTheme = useCallback((next: ThemePreference) => {
-    setThemeState(next)
+    setThemeState(next);
     try {
       if (next === 'system') {
-        localStorage.removeItem(STORAGE_KEY)
+        localStorage.removeItem(STORAGE_KEY);
       } else {
-        localStorage.setItem(STORAGE_KEY, next)
+        localStorage.setItem(STORAGE_KEY, next);
       }
     } catch {
       // Private-browsing modes can throw on write — the in-memory state
       // still applies for the rest of this session, just not persisted.
     }
-  }, [])
+  }, []);
 
-  return <ThemeContext value={{ theme, setTheme }}>{children}</ThemeContext>
+  return <ThemeContext value={{ theme, setTheme }}>{children}</ThemeContext>;
 }
 
 export function useTheme(): ThemeContextValue {
-  const context = use(ThemeContext)
+  const context = use(ThemeContext);
   if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider')
+    throw new Error('useTheme must be used within a ThemeProvider');
   }
-  return context
+  return context;
 }

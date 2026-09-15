@@ -16,7 +16,9 @@ from .base import single_shot
 
 
 @single_shot
-def evaluate(ticker: str, params: dict, prices: pd.DataFrame, market: Market) -> str | None:
+def evaluate(
+    ticker: str, params: dict, prices: pd.DataFrame, market: Market
+) -> str | None:
     window = prices.tail(params["lookbackDays"])
     highs = window["High"].to_numpy()
     if len(highs) < 5:

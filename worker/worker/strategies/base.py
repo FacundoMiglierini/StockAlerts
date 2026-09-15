@@ -22,7 +22,9 @@ class EvaluationResult:
 # currency of any price mentioned in `message` (see ..market.currency_symbol)
 # — it's threaded through even to strategies whose message doesn't need it,
 # so every registered strategy shares one call signature.
-Strategy = Callable[[str, dict, pd.DataFrame, NotificationStatus, Market], "EvaluationResult | None"]
+Strategy = Callable[
+    [str, dict, pd.DataFrame, NotificationStatus, Market], "EvaluationResult | None"
+]
 
 # A single-shot strategy's trigger check: given the alarm's ticker/params/
 # prices/market, return a message if it triggered, or None otherwise.

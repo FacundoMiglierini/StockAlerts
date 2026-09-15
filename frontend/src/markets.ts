@@ -1,4 +1,4 @@
-import type { Market } from './types'
+import type { Market } from './types';
 
 // Mirrors worker/worker/market.py's per-market conventions — keep in sync.
 // USA covers any US-listed ticker (NASDAQ, NYSE, S&P 500 constituents,
@@ -10,16 +10,16 @@ export const MARKET_LABELS: Record<Market, string> = {
   USA: 'USA',
   CRYPTO: 'Crypto',
   BYMA: 'BYMA',
-}
+};
 
 export const CURRENCY_SYMBOLS: Record<Market, string> = {
   USA: 'US$',
   CRYPTO: 'US$',
   BYMA: 'AR$',
-}
+};
 
 export const CURRENCY_CODES: Record<Market, string> = {
   USA: 'USD',
   CRYPTO: 'USD',
   BYMA: 'ARS',
-}
+};

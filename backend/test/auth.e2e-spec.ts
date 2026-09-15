@@ -25,7 +25,10 @@ describe('Auth (e2e)', () => {
   });
 
   it('logs in with correct credentials and the token works against a protected route', async () => {
-    await usersService.create({ email: 'user@test.com', password: 'correct-password' });
+    await usersService.create({
+      email: 'user@test.com',
+      password: 'correct-password',
+    });
 
     const login = await request(app.getHttpServer())
       .post('/auth/login')
@@ -33,7 +36,11 @@ describe('Auth (e2e)', () => {
       .expect(200);
 
     expect(login.body.accessToken).toEqual(expect.any(String));
-    expect(login.body.user).toEqual({ id: expect.any(String), email: 'user@test.com', role: 'USER' });
+    expect(login.body.user).toEqual({
+      id: expect.any(String),
+      email: 'user@test.com',
+      role: 'USER',
+    });
 
     await request(app.getHttpServer())
       .get('/users/me')
@@ -42,7 +49,10 @@ describe('Auth (e2e)', () => {
   });
 
   it('rejects a wrong password', async () => {
-    await usersService.create({ email: 'user@test.com', password: 'correct-password' });
+    await usersService.create({
+      email: 'user@test.com',
+      password: 'correct-password',
+    });
 
     await request(app.getHttpServer())
       .post('/auth/login')

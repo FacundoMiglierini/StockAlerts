@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import logging
+from html import escape as html_escape
 
 import requests
 
 from .. import config
-from .base import Contact
+from .base import ALERT_ICONS, Contact, classify_alert
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +26,16 @@ class TelegramNotifier:
         if not chat_id:
             return  # This user hasn't linked Telegram.
 
+        icon = ALERT_ICONS[classify_alert(body)]
+        # parse_mode "HTML": Telegram's other option, MarkdownV2, requires
+        # escaping a long list of characters that are entirely ordinary in
+        # a price ("!", "-", ".", "("...) — HTML's small escape set (&<>)
+        # is far less likely to collide with anything a strategy's message
+        # ever contains.
+        text = f"<b>{icon} {html_escape(subject)}</b>\n\n{html_escape(body)}"
         response = requests.post(
             f"{config.TELEGRAM_API_BASE_URL}/bot{config.TELEGRAM_BOT_TOKEN}/sendMessage",
-            json={"chat_id": chat_id, "text": f"{subject}\n\n{body}"},
+            json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"},
             timeout=10,
         )
         response.raise_for_status()

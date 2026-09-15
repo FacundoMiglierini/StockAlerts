@@ -1,21 +1,28 @@
-import { useState } from 'react'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
-import { LogoMark, LogOutIcon, MenuIcon, BellIcon, GearIcon, ShieldIcon } from './icons'
-import { ConfirmDialog } from './ConfirmDialog'
+import { useState } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import {
+  LogoMark,
+  LogOutIcon,
+  MenuIcon,
+  BellIcon,
+  GearIcon,
+  ShieldIcon,
+} from './icons';
+import { ConfirmDialog } from './ConfirmDialog';
 
 export function Layout() {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const [navOpen, setNavOpen] = useState(false)
-  const [confirmingLogout, setConfirmingLogout] = useState(false)
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [navOpen, setNavOpen] = useState(false);
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
 
   function handleLogout() {
-    setConfirmingLogout(false)
-    setNavOpen(false)
-    logout()
-    navigate('/login')
+    setConfirmingLogout(false);
+    setNavOpen(false);
+    logout();
+    navigate('/login');
   }
 
   return (
@@ -57,7 +64,11 @@ export function Layout() {
         <div className="app-header-user">
           <span className="text-muted">{user?.email}</span>
           <div className="app-header-divider" />
-          <button type="button" className="icon-button" onClick={() => setConfirmingLogout(true)}>
+          <button
+            type="button"
+            className="icon-button"
+            onClick={() => setConfirmingLogout(true)}
+          >
             <LogOutIcon />
             Log out
           </button>
@@ -79,5 +90,5 @@ export function Layout() {
         />
       )}
     </div>
-  )
+  );
 }

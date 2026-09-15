@@ -1,4 +1,10 @@
-import { IsEnum, IsObject, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsEnum,
+  IsObject,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import { Market, StrategyType } from '../../../generated/prisma/enums.js';
 
 export class CreateAlarmDto {

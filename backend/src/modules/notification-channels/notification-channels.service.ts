@@ -22,6 +22,8 @@ export class NotificationChannelsService {
   }
 
   async unlink(userId: string, type: NotificationChannelType) {
-    await this.prisma.notificationChannel.deleteMany({ where: { userId, type } });
+    await this.prisma.notificationChannel.deleteMany({
+      where: { userId, type },
+    });
   }
 }

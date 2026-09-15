@@ -43,20 +43,112 @@ where that pattern earns its keep.
   with `docker stats` after first deploy rather than trusting these numbers
   blindly.
 
-### Deployment split option (frontend on free-tier cloud)
+### Deploying for free (frontend on Netlify, backend/worker on a home server)
 
-The frontend is a static SPA build, which fits free static hosts (Vercel,
-Netlify, Cloudflare Pages) with a free `*.vercel.app`/`*.pages.dev`
-subdomain — no home-server RAM/bandwidth spent serving it, and it's
-reachable without exposing the home network. Backend, worker, and Postgres
-stay home-hosted (they need to reach the DB and hold secrets).
+Chosen split (2026-09-13): the frontend is a static SPA build, deployed to
+**Netlify** (free `*.netlify.app` subdomain, free HTTPS) straight from the
+`frontend/` directory — no home-server RAM/bandwidth spent serving it, and
+Netlify's own build step reads `VITE_API_URL` as a build-time env var the
+same way `docker-compose.yml`'s `frontend` service's build `args` do
+locally. Backend, worker, and Postgres stay home-hosted via
+`docker-compose.yml` — they need to reach the DB and hold secrets.
 
-Trade-off if split this way: the frontend needs to reach the backend API
-over the public internet, which means either (a) exposing the backend
-through something like a Cloudflare Tunnel or reverse-proxy with a domain +
-TLS, or (b) keeping frontend home-hosted too and only doing this split
-later if remote access becomes a real need. Not required for v1 — worth
-deciding once the backend API exists and remote access is actually wanted.
+The gap this split creates: Netlify needs a public HTTPS URL for the
+backend, and there's no purchased domain. Solved with **Tailscale
+Funnel** rather than router port-forwarding + a free dynamic-DNS
+subdomain (the more "traditional" option) — Funnel needs no port
+forwarding at all and works even behind CGNAT, which residential ISPs
+increasingly use and which silently breaks port-forwarding entirely.
+`docker-compose.yml`'s `tailscale` service (`profiles: ["funnel"]` — never
+started by a plain `docker compose up`, only relevant on the actual
+home-server deploy) is a sidecar on `network_mode: "service:backend"`, so
+from inside it `backend`'s port 3000 is just `localhost:3000`.
+
+Everything below is the actual, ordered checklist for taking this from
+local dev (this repo, `docker compose up` on a laptop) to the real split —
+Postgres/backend/worker on the Mini PC, frontend on Netlify. Nothing here
+has been run against the Mini PC yet; local dev has only ever exercised
+`docker-compose.yml`'s default services.
+
+**Part A — Postgres/backend/worker on the Mini PC**
+
+0. Prerequisites on the Mini PC: Docker + the Compose plugin installed,
+   this repo cloned/pulled there, and a real `.env` (`cp .env.example .env`
+   then fill in every secret for real — `JWT_SECRET` to a fresh random
+   value, `ADMIN_EMAIL`/`ADMIN_PASSWORD` to the real admin login,
+   `BACKEND_MAIL_*`/`WORKER_MAIL_*` to a real SMTP credential (a Gmail
+   app-password works, or a free-tier transactional provider like
+   Brevo/Resend — emails silently fail-log rather than crash anything if
+   left blank, but nobody receives them), `WORKER_TELEGRAM_BOT_TOKEN` if
+   Telegram notifications matter, `WORKER_FINNHUB_API_KEY` only if that
+   integration is ever flipped on. Leave `FRONTEND_URL` at its default for
+   now — step 6 below comes back to it once the Netlify URL actually
+   exists.
+1. `docker compose up -d --build postgres backend worker` — **deliberately
+   not `frontend`**: that service is only for local dev against this
+   repo's own nginx container; the real frontend is Netlify-hosted (Part
+   B), so running it here too would just burn RAM for a container nothing
+   points at. Migrations apply automatically
+   (`docker-entrypoint.sh` runs `prisma migrate deploy` on backend boot —
+   see `backend/CLAUDE.md`'s Docker section), so no separate migration
+   step is needed.
+2. Generate a **reusable, non-ephemeral** Tailscale auth key at
+   https://login.tailscale.com/admin/settings/keys, set it as `TS_AUTHKEY`
+   in the Mini PC's `.env`.
+3. In the Tailscale admin console's DNS tab, enable **HTTPS Certificates**
+   for the tailnet — Funnel won't issue a cert without this.
+4. `docker compose --profile funnel up -d tailscale`
+5. `docker compose exec tailscale tailscale funnel --bg 3000` — one-time;
+   the resulting config persists in the `tailscale_state` volume across
+   restarts. Prints the public URL, e.g.
+   `https://stock-alerts.<your-tailnet>.ts.net` — copy it, Part B needs it.
+   If it errors asking for Funnel to be enabled, add to the tailnet's ACL
+   policy: `"nodeAttrs": [{"target": ["autogroup:member"], "attr":
+   ["funnel"]}]`.
+
+Postgres and the worker are never exposed — only `backend`'s port needs a
+public URL, and CORS is already wide-open (`app.enableCors()` in
+`backend/src/main.ts`), so no backend code change is needed for the
+Netlify origin specifically.
+
+**Part B — Frontend on Netlify**
+
+0. This repo has no git remote yet — Netlify's standard flow needs one
+   (GitHub/GitLab/Bitbucket) to build from on every push. Push it to a
+   GitHub repo first, or use `netlify deploy` (Netlify CLI) for a one-off
+   manual deploy if a git remote isn't wanted yet.
+1. In Netlify, "Add new site" → "Import an existing project" → pick the
+   repo. Build settings: **Base directory** `frontend`, **Build command**
+   `npm run build`, **Publish directory** `dist` (relative to the base
+   directory).
+2. Before the first deploy, add a site (or "deploy context") environment
+   variable: `VITE_API_URL` = the Funnel URL from Part A step 5. This is
+   read at **build time** (Vite inlines `import.meta.env.VITE_*`), same as
+   `docker-compose.yml`'s `frontend` build `args` do locally — so changing
+   it later always needs a re-deploy, not just a page refresh.
+3. Deploy. Note the resulting `https://<site-name>.netlify.app` URL.
+
+**Part C — Wire them together**
+
+4. Back on the Mini PC, set `FRONTEND_URL` in `.env` to that Netlify URL
+   (no trailing slash) — this is what password-reset/invite emails link
+   to.
+5. `docker compose up -d backend` — **not** `docker compose restart
+   backend`. Compose only re-reads `.env`/interpolated environment values
+   when a container is (re)created, not on a plain restart of an existing
+   one; a restart silently keeps serving whatever `FRONTEND_URL` (or any
+   other var) the container booted with. This bit twice during local
+   testing of unrelated env changes this same way — always `up -d
+   <service>` after editing `.env`, never just `restart`.
+6. Verify from a network that isn't the tailnet (e.g. phone on cellular)
+   that the Funnel URL responds — confirms it's really public, not just
+   tailnet-reachable.
+7. Smoke-test end to end from the actual Netlify URL: log in, confirm
+   alarms load (proves CORS + Funnel + `VITE_API_URL` are all wired
+   correctly); run "Forgot password?" and confirm the emailed link points
+   at the Netlify domain, not `localhost` (proves `FRONTEND_URL`); check
+   `docker compose logs worker` on the Mini PC for a clean evaluation pass
+   with no crashes.
 
 ## Data provider strategy
 

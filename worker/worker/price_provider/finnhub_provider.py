@@ -39,7 +39,12 @@ class FinnhubProvider:
         now = int(time.time())
         data = self._get(
             "/stock/candle",
-            {"symbol": ticker, "resolution": "D", "from": now - days * 86400, "to": now},
+            {
+                "symbol": ticker,
+                "resolution": "D",
+                "from": now - days * 86400,
+                "to": now,
+            },
         )
         if data.get("s") != "ok":
             raise ValueError(f"Finnhub candle request failed for {ticker}: {data}")

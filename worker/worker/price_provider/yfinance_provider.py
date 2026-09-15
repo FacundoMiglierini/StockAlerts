@@ -9,7 +9,9 @@ class YFinanceProvider:
     can break without notice, which is exactly why it isn't primary."""
 
     def get_daily_history(self, ticker: str, period: str) -> pd.DataFrame:
-        data = yf.download(ticker, period=period, interval="1d", progress=False, auto_adjust=True)
+        data = yf.download(
+            ticker, period=period, interval="1d", progress=False, auto_adjust=True
+        )
         if data.empty:
             raise ValueError(f"No price history returned for {ticker}")
         if isinstance(data.columns, pd.MultiIndex):

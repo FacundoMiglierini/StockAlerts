@@ -16,7 +16,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const passwordMatches = await this.usersService.verifyPassword(password, user.passwordHash);
+    const passwordMatches = await this.usersService.verifyPassword(
+      password,
+      user.passwordHash,
+    );
     if (!passwordMatches) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -25,7 +28,11 @@ export class AuthService {
       throw new UnauthorizedException('This account has been disabled');
     }
 
-    const payload: JwtPayload = { sub: user.id, email: user.email, role: user.role };
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
     return {
       accessToken: await this.jwtService.signAsync(payload),
       user: { id: user.id, email: user.email, role: user.role },

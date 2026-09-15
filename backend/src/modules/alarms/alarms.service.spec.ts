@@ -1,6 +1,11 @@
 import { NotFoundException } from '@nestjs/common';
 import { AlarmsService } from './alarms.service.js';
-import { StrategyType, AlarmStatus, Market } from '../../generated/prisma/enums.js';
+import {
+  StrategyType,
+  AlarmStatus,
+  Market,
+  NotificationStatus,
+} from '../../generated/prisma/enums.js';
 import type { PrismaService } from '../../common/prisma/prisma.service.js';
 
 function createPrismaMock() {
@@ -48,7 +53,9 @@ describe('AlarmsService', () => {
       const result = await service.findOneForUser(USER_ID, 'alarm-1');
 
       expect(result).toBe(alarm);
-      expect(prisma.alarm.findFirst).toHaveBeenCalledWith({ where: { id: 'alarm-1', userId: USER_ID } });
+      expect(prisma.alarm.findFirst).toHaveBeenCalledWith({
+        where: { id: 'alarm-1', userId: USER_ID },
+      });
     });
 
     it('throws NotFoundException when the alarm belongs to a different user', async () => {
@@ -57,7 +64,9 @@ describe('AlarmsService', () => {
       // whether an alarm id exists at all, not a separate ownership check.
       prisma.alarm.findFirst.mockResolvedValue(null);
 
-      await expect(service.findOneForUser(OTHER_USER_ID, 'alarm-1')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.findOneForUser(OTHER_USER_ID, 'alarm-1'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -134,7 +143,9 @@ describe('AlarmsService', () => {
         strategyType: StrategyType.RSI,
       });
 
-      await service.update(USER_ID, 'alarm-1', { status: AlarmStatus.DISABLED });
+      await service.update(USER_ID, 'alarm-1', {
+        status: AlarmStatus.DISABLED,
+      });
 
       expect(prisma.alarm.update).toHaveBeenCalledWith({
         where: { id: 'alarm-1' },
@@ -142,29 +153,74 @@ describe('AlarmsService', () => {
       });
     });
 
+    it('re-arming a TRIGGERED alarm resets notificationStatus and triggeredAt', async () => {
+      prisma.alarm.findFirst.mockResolvedValue({
+        id: 'alarm-1',
+        userId: USER_ID,
+        strategyType: StrategyType.RSI,
+        status: AlarmStatus.TRIGGERED,
+        notificationStatus: NotificationStatus.NOTIFIED_ONCE,
+      });
+
+      await service.update(USER_ID, 'alarm-1', { status: AlarmStatus.ACTIVE });
+
+      expect(prisma.alarm.update).toHaveBeenCalledWith({
+        where: { id: 'alarm-1' },
+        data: {
+          status: AlarmStatus.ACTIVE,
+          notificationStatus: NotificationStatus.NOT_NOTIFIED,
+          triggeredAt: null,
+        },
+      });
+    });
+
+    it('enabling a DISABLED alarm does not reset notificationStatus, so an in-progress MANUAL_THRESHOLD cycle resumes', async () => {
+      prisma.alarm.findFirst.mockResolvedValue({
+        id: 'alarm-1',
+        userId: USER_ID,
+        strategyType: StrategyType.MANUAL_THRESHOLD,
+        status: AlarmStatus.DISABLED,
+        notificationStatus: NotificationStatus.NOTIFIED_ONCE,
+      });
+
+      await service.update(USER_ID, 'alarm-1', { status: AlarmStatus.ACTIVE });
+
+      expect(prisma.alarm.update).toHaveBeenCalledWith({
+        where: { id: 'alarm-1' },
+        data: { status: AlarmStatus.ACTIVE },
+      });
+    });
+
     it('throws NotFoundException before validating params, for an alarm that is not the caller’s', async () => {
       prisma.alarm.findFirst.mockResolvedValue(null);
 
-      await expect(service.update(OTHER_USER_ID, 'alarm-1', { params: {} })).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.update(OTHER_USER_ID, 'alarm-1', { params: {} }),
+      ).rejects.toThrow(NotFoundException);
       expect(prisma.alarm.update).not.toHaveBeenCalled();
     });
   });
 
   describe('remove', () => {
     it('deletes only after confirming ownership', async () => {
-      prisma.alarm.findFirst.mockResolvedValue({ id: 'alarm-1', userId: USER_ID });
+      prisma.alarm.findFirst.mockResolvedValue({
+        id: 'alarm-1',
+        userId: USER_ID,
+      });
 
       await service.remove(USER_ID, 'alarm-1');
 
-      expect(prisma.alarm.delete).toHaveBeenCalledWith({ where: { id: 'alarm-1' } });
+      expect(prisma.alarm.delete).toHaveBeenCalledWith({
+        where: { id: 'alarm-1' },
+      });
     });
 
     it('does not delete an alarm belonging to another user', async () => {
       prisma.alarm.findFirst.mockResolvedValue(null);
 
-      await expect(service.remove(OTHER_USER_ID, 'alarm-1')).rejects.toThrow(NotFoundException);
+      await expect(service.remove(OTHER_USER_ID, 'alarm-1')).rejects.toThrow(
+        NotFoundException,
+      );
       expect(prisma.alarm.delete).not.toHaveBeenCalled();
     });
   });

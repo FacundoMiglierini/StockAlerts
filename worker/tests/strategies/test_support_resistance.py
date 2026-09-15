@@ -17,7 +17,13 @@ def test_fires_once_price_breaks_below_the_drawdown_level(prices_factory):
     highs, lows = _rise_then_fall()
     prices = prices_factory(closes=highs, highs=highs, lows=lows)
 
-    result = evaluate("AAPL", PARAMS, prices, notification_status=NotificationStatus.NOT_NOTIFIED, market=Market.USA)
+    result = evaluate(
+        "AAPL",
+        PARAMS,
+        prices,
+        notification_status=NotificationStatus.NOT_NOTIFIED,
+        market=Market.USA,
+    )
 
     assert result is not None
     assert result.new_status == AlarmStatus.TRIGGERED
@@ -30,7 +36,13 @@ def test_no_signal_without_any_local_high_to_measure_from(prices_factory):
     highs = list(range(0, 21))
     prices = prices_factory(closes=highs, highs=highs, lows=[h - 1 for h in highs])
 
-    result = evaluate("AAPL", PARAMS, prices, notification_status=NotificationStatus.NOT_NOTIFIED, market=Market.USA)
+    result = evaluate(
+        "AAPL",
+        PARAMS,
+        prices,
+        notification_status=NotificationStatus.NOT_NOTIFIED,
+        market=Market.USA,
+    )
 
     assert result is None
 
@@ -40,7 +52,13 @@ def test_no_signal_when_the_dip_does_not_breach_support(prices_factory):
     lows = [h - 0.1 for h in highs]
     prices = prices_factory(closes=highs, highs=highs, lows=lows)
 
-    result = evaluate("AAPL", PARAMS, prices, notification_status=NotificationStatus.NOT_NOTIFIED, market=Market.USA)
+    result = evaluate(
+        "AAPL",
+        PARAMS,
+        prices,
+        notification_status=NotificationStatus.NOT_NOTIFIED,
+        market=Market.USA,
+    )
 
     assert result is None
 
@@ -49,6 +67,12 @@ def test_already_notified_alarms_stay_silent(prices_factory):
     highs, lows = _rise_then_fall()
     prices = prices_factory(closes=highs, highs=highs, lows=lows)
 
-    result = evaluate("AAPL", PARAMS, prices, notification_status=NotificationStatus.NOTIFIED_ONCE, market=Market.USA)
+    result = evaluate(
+        "AAPL",
+        PARAMS,
+        prices,
+        notification_status=NotificationStatus.NOTIFIED_ONCE,
+        market=Market.USA,
+    )
 
     assert result is None

@@ -1,41 +1,41 @@
-import { useState } from 'react'
-import type { Market } from '../types'
-import { searchTickers } from '../tickers'
+import { useState } from 'react';
+import type { Market } from '../types';
+import { searchTickers } from '../tickers';
 
 interface Props {
-  value: string
-  market: Market
-  onChange: (value: string) => void
+  value: string;
+  market: Market;
+  onChange: (value: string) => void;
 }
 
 export function TickerInput({ value, market, onChange }: Props) {
-  const [open, setOpen] = useState(false)
-  const [highlighted, setHighlighted] = useState(0)
+  const [open, setOpen] = useState(false);
+  const [highlighted, setHighlighted] = useState(0);
 
-  const matches = searchTickers(market, value)
+  const matches = searchTickers(market, value);
 
   function selectTicker(symbol: string) {
-    onChange(symbol)
-    setOpen(false)
+    onChange(symbol);
+    setOpen(false);
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-    if (!open || matches.length === 0) return
+    if (!open || matches.length === 0) return;
     if (event.key === 'ArrowDown') {
-      event.preventDefault()
-      setHighlighted((prev) => (prev + 1) % matches.length)
+      event.preventDefault();
+      setHighlighted((prev) => (prev + 1) % matches.length);
     } else if (event.key === 'ArrowUp') {
-      event.preventDefault()
-      setHighlighted((prev) => (prev - 1 + matches.length) % matches.length)
+      event.preventDefault();
+      setHighlighted((prev) => (prev - 1 + matches.length) % matches.length);
     } else if (event.key === 'Enter' && highlighted >= 0) {
-      event.preventDefault()
-      selectTicker(matches[highlighted].symbol)
+      event.preventDefault();
+      selectTicker(matches[highlighted].symbol);
     } else if (event.key === 'Escape') {
       // Stop propagation so this only closes the suggestions dropdown, not
       // a wrapping Modal that also listens for Escape (e.g. the "New
       // alarm" modal) — otherwise dismissing the dropdown closes the form.
-      event.stopPropagation()
-      setOpen(false)
+      event.stopPropagation();
+      setOpen(false);
     }
   }
 
@@ -45,9 +45,9 @@ export function TickerInput({ value, market, onChange }: Props) {
         className="ticker"
         value={value}
         onChange={(e) => {
-          onChange(e.target.value.toUpperCase())
-          setOpen(true)
-          setHighlighted(0)
+          onChange(e.target.value.toUpperCase());
+          setOpen(true);
+          setHighlighted(0);
         }}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
@@ -74,5 +74,5 @@ export function TickerInput({ value, market, onChange }: Props) {
         </ul>
       )}
     </div>
-  )
+  );
 }

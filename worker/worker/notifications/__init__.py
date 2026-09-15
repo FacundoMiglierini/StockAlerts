@@ -24,7 +24,9 @@ class CompositeNotifier:
             try:
                 notifier.send(contact, subject, body)
             except Exception:
-                logger.exception("%s failed to notify %s", type(notifier).__name__, contact.email)
+                logger.exception(
+                    "%s failed to notify %s", type(notifier).__name__, contact.email
+                )
 
 
 def get_notifier() -> Notifier:

@@ -51,7 +51,10 @@ export class PasswordResetService {
       // than "no account with that email" — either would let a caller
       // distinguish which emails are registered. Log it; the user can
       // always request another link.
-      this.logger.error(`Failed to send password reset email to ${user.email}`, error as Error);
+      this.logger.error(
+        `Failed to send password reset email to ${user.email}`,
+        error as Error,
+      );
     }
   }
 
@@ -61,13 +64,21 @@ export class PasswordResetService {
     });
 
     if (!record || record.usedAt || record.expiresAt < new Date()) {
-      throw new BadRequestException('This reset link is invalid or has expired');
+      throw new BadRequestException(
+        'This reset link is invalid or has expired',
+      );
     }
 
     const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
     await this.prisma.$transaction([
-      this.prisma.user.update({ where: { id: record.userId }, data: { passwordHash } }),
-      this.prisma.passwordResetToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
+      this.prisma.user.update({
+        where: { id: record.userId },
+        data: { passwordHash },
+      }),
+      this.prisma.passwordResetToken.update({
+        where: { id: record.id },
+        data: { usedAt: new Date() },
+      }),
       // Any other outstanding reset links for this user are no longer
       // meaningful once one has been redeemed.
       this.prisma.passwordResetToken.deleteMany({

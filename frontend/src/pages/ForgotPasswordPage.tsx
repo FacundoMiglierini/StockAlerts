@@ -1,33 +1,33 @@
-import { useState } from 'react'
-import type { SubmitEvent } from 'react'
-import { Link } from 'react-router-dom'
-import { api } from '../api/client'
-import { BackIcon, CheckCircleIcon, MailIcon } from '../components/icons'
-import { isValidEmail } from '../validation'
+import { useState } from 'react';
+import type { SubmitEvent } from 'react';
+import { Link } from 'react-router-dom';
+import { api } from '../api/client';
+import { BackIcon, CheckCircleIcon, MailIcon } from '../components/icons';
+import { isValidEmail } from '../validation';
 
 export function ForgotPasswordPage() {
-  const [email, setEmail] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
-  const [sent, setSent] = useState(false)
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [sent, setSent] = useState(false);
 
   async function handleSubmit(event: SubmitEvent) {
-    event.preventDefault()
-    setError(null)
+    event.preventDefault();
+    setError(null);
 
     if (!isValidEmail(email)) {
-      setError('Enter a valid email address')
-      return
+      setError('Enter a valid email address');
+      return;
     }
 
-    setSubmitting(true)
+    setSubmitting(true);
     try {
-      await api.post('/auth/forgot-password', { email })
-      setSent(true)
+      await api.post('/auth/forgot-password', { email });
+      setSent(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
@@ -41,8 +41,8 @@ export function ForgotPasswordPage() {
             </span>
             <h1 className="login-title">Check your inbox</h1>
             <p className="text-muted">
-              If an account exists for <strong>{email}</strong>, we've sent a link to reset the password. The
-              link expires in 1 hour.
+              If an account exists for <strong>{email}</strong>, we've sent a
+              link to reset the password. The link expires in 1 hour.
             </p>
           </div>
           <Link to="/login" className="back-to-login-link">
@@ -51,7 +51,7 @@ export function ForgotPasswordPage() {
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -63,7 +63,9 @@ export function ForgotPasswordPage() {
           </span>
           <div>
             <h1 className="login-title">Reset your password</h1>
-            <p className="text-muted login-tagline">We'll email you a link to set a new one.</p>
+            <p className="text-muted login-tagline">
+              We'll email you a link to set a new one.
+            </p>
           </div>
         </div>
 
@@ -91,5 +93,5 @@ export function ForgotPasswordPage() {
         </Link>
       </div>
     </div>
-  )
+  );
 }

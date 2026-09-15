@@ -56,7 +56,9 @@ def engine() -> Engine:
 def clean_db(engine: Engine):
     """Every integration test starts from an empty database."""
     with engine.begin() as conn:
-        conn.execute(text('TRUNCATE TABLE "users", "alarms", "notification_channels" CASCADE'))
+        conn.execute(
+            text('TRUNCATE TABLE "users", "alarms", "notification_channels" CASCADE')
+        )
     yield
 
 
@@ -87,16 +89,14 @@ def insert_alarm(
     alarm_id = str(uuid.uuid4())
     with engine.begin() as conn:
         conn.execute(
-            text(
-                """
+            text("""
                 INSERT INTO alarms
                     (id, "userId", ticker, "strategyType", params, status, "notificationStatus", market, "createdAt", "updatedAt")
                 VALUES
                     (:id, :user_id, :ticker, CAST(:strategy_type AS "StrategyType"), CAST(:params AS jsonb),
                      CAST(:status AS "AlarmStatus"), CAST(:notification_status AS "NotificationStatus"),
                      CAST(:market AS "Market"), now(), now())
-                """
-            ),
+                """),
             {
                 "id": alarm_id,
                 "user_id": user_id,
@@ -111,25 +111,40 @@ def insert_alarm(
     return alarm_id
 
 
-def insert_channel(engine: Engine, *, user_id: str, channel_type: str = "TELEGRAM", external_id: str = "123") -> None:
+def insert_channel(
+    engine: Engine,
+    *,
+    user_id: str,
+    channel_type: str = "TELEGRAM",
+    external_id: str = "123",
+) -> None:
     with engine.begin() as conn:
         conn.execute(
             text(
                 'INSERT INTO notification_channels (id, "userId", type, "externalId", "createdAt") '
                 'VALUES (:id, :user_id, CAST(:type AS "NotificationChannelType"), :external_id, now())'
             ),
-            {"id": str(uuid.uuid4()), "user_id": user_id, "type": channel_type, "external_id": external_id},
+            {
+                "id": str(uuid.uuid4()),
+                "user_id": user_id,
+                "type": channel_type,
+                "external_id": external_id,
+            },
         )
 
 
 def fetch_alarm_row(engine: Engine, alarm_id: str) -> dict:
     with engine.connect() as conn:
-        row = conn.execute(
-            text(
-                'SELECT status::text AS status, "notificationStatus"::text AS "notificationStatus", '
-                '"triggeredAt" FROM alarms WHERE id = :id'
-            ),
-            {"id": alarm_id},
-        ).mappings().first()
+        row = (
+            conn.execute(
+                text(
+                    'SELECT status::text AS status, "notificationStatus"::text AS "notificationStatus", '
+                    '"triggeredAt" FROM alarms WHERE id = :id'
+                ),
+                {"id": alarm_id},
+            )
+            .mappings()
+            .first()
+        )
     assert row is not None
     return dict(row)

@@ -26,7 +26,9 @@ FINNHUB_API_KEY = os.getenv("WORKER_FINNHUB_API_KEY")
 # Off by default: Finnhub's free tier can't serve historical daily candles
 # (/stock/candle returns 403 — paid-plan-only). Flip this on only if you've
 # upgraded past the free tier. See worker/CLAUDE.md.
-FINNHUB_HISTORY_ENABLED = os.getenv("WORKER_FINNHUB_HISTORY_ENABLED", "false").lower() == "true"
+FINNHUB_HISTORY_ENABLED = (
+    os.getenv("WORKER_FINNHUB_HISTORY_ENABLED", "false").lower() == "true"
+)
 FINNHUB_BASE_URL = os.getenv("WORKER_FINNHUB_BASE_URL", "https://finnhub.io/api/v1")
 
 MAIL_HOST = os.getenv("WORKER_MAIL_HOST", "smtp.gmail.com")
@@ -39,4 +41,6 @@ MAIL_PASSWORD = os.getenv("WORKER_MAIL_PASSWORD")
 # @BotFather); each user links their own chat id through the backend
 # (PATCH /users/me). See worker/CLAUDE.md for the linking steps.
 TELEGRAM_BOT_TOKEN = os.getenv("WORKER_TELEGRAM_BOT_TOKEN")
-TELEGRAM_API_BASE_URL = os.getenv("WORKER_TELEGRAM_API_BASE_URL", "https://api.telegram.org")
+TELEGRAM_API_BASE_URL = os.getenv(
+    "WORKER_TELEGRAM_API_BASE_URL", "https://api.telegram.org"
+)

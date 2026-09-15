@@ -51,19 +51,29 @@ export class UsersService {
   // self-service. Requires the current password, same as most auth flows,
   // so a hijacked-but-still-logged-in session can't silently lock the real
   // owner out.
-  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
     const user = await this.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const currentMatches = await this.verifyPassword(currentPassword, user.passwordHash);
+    const currentMatches = await this.verifyPassword(
+      currentPassword,
+      user.passwordHash,
+    );
     if (!currentMatches) {
       throw new UnauthorizedException('Current password is incorrect');
     }
 
     const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
-    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
   }
 
   // Admin-only roster (users.controller.ts gates these behind @Roles(ADMIN)).
@@ -82,7 +92,11 @@ export class UsersService {
     }));
   }
 
-  async setActive(actingAdminId: string, targetUserId: string, active: boolean) {
+  async setActive(
+    actingAdminId: string,
+    targetUserId: string,
+    active: boolean,
+  ) {
     if (actingAdminId === targetUserId) {
       throw new BadRequestException('You cannot disable your own account');
     }
@@ -91,9 +105,14 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
     if (user.isDefaultAdmin) {
-      throw new BadRequestException('The default admin account cannot be disabled');
+      throw new BadRequestException(
+        'The default admin account cannot be disabled',
+      );
     }
-    return this.prisma.user.update({ where: { id: targetUserId }, data: { active } });
+    return this.prisma.user.update({
+      where: { id: targetUserId },
+      data: { active },
+    });
   }
 
   async remove(actingAdminId: string, targetUserId: string) {
@@ -105,7 +124,9 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
     if (user.isDefaultAdmin) {
-      throw new BadRequestException('The default admin account cannot be deleted');
+      throw new BadRequestException(
+        'The default admin account cannot be deleted',
+      );
     }
     await this.prisma.user.delete({ where: { id: targetUserId } });
   }
