@@ -28,14 +28,18 @@ def rsi(series: pd.Series, period: int) -> pd.Series:
     return 100 - (100 / (1 + rs))
 
 
-def macd(series: pd.Series, fast_period: int, slow_period: int, signal_period: int) -> tuple[pd.Series, pd.Series]:
+def macd(
+    series: pd.Series, fast_period: int, slow_period: int, signal_period: int
+) -> tuple[pd.Series, pd.Series]:
     """Returns (macd_line, signal_line)."""
     macd_line = ema(series, fast_period) - ema(series, slow_period)
     signal_line = ema(macd_line, signal_period)
     return macd_line, signal_line
 
 
-def bollinger_bands(series: pd.Series, period: int, std_dev: float) -> tuple[pd.Series, pd.Series]:
+def bollinger_bands(
+    series: pd.Series, period: int, std_dev: float
+) -> tuple[pd.Series, pd.Series]:
     """Returns (lower_band, upper_band)."""
     mid = sma(series, period)
     std = series.rolling(window=period).std()

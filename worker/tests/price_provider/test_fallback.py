@@ -55,7 +55,9 @@ def test_goes_straight_to_fallback_when_there_is_no_primary():
 
 
 class TestGetPriceProvider:
-    def test_finnhub_disabled_by_default_even_with_an_api_key(self, monkeypatch: pytest.MonkeyPatch):
+    def test_finnhub_disabled_by_default_even_with_an_api_key(
+        self, monkeypatch: pytest.MonkeyPatch
+    ):
         monkeypatch.setattr(config, "FINNHUB_API_KEY", "some-key")
         monkeypatch.setattr(config, "FINNHUB_HISTORY_ENABLED", False)
 
@@ -64,7 +66,9 @@ class TestGetPriceProvider:
         assert provider._primary is None
         assert isinstance(provider._fallback, YFinanceProvider)
 
-    def test_finnhub_used_as_primary_once_explicitly_enabled(self, monkeypatch: pytest.MonkeyPatch):
+    def test_finnhub_used_as_primary_once_explicitly_enabled(
+        self, monkeypatch: pytest.MonkeyPatch
+    ):
         monkeypatch.setattr(config, "FINNHUB_API_KEY", "some-key")
         monkeypatch.setattr(config, "FINNHUB_HISTORY_ENABLED", True)
 
@@ -72,7 +76,9 @@ class TestGetPriceProvider:
 
         assert isinstance(provider._primary, FinnhubProvider)
 
-    def test_no_primary_at_all_without_an_api_key(self, monkeypatch: pytest.MonkeyPatch):
+    def test_no_primary_at_all_without_an_api_key(
+        self, monkeypatch: pytest.MonkeyPatch
+    ):
         monkeypatch.setattr(config, "FINNHUB_API_KEY", None)
         monkeypatch.setattr(config, "FINNHUB_HISTORY_ENABLED", True)
 

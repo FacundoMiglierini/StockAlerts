@@ -25,14 +25,20 @@ def evaluate(
     today = prices.iloc[-1]
     currency = currency_symbol(market)
 
-    if notification_status == NotificationStatus.NOT_NOTIFIED and today["Low"] <= trigger:
+    if (
+        notification_status == NotificationStatus.NOT_NOTIFIED
+        and today["Low"] <= trigger
+    ):
         return EvaluationResult(
             new_notification_status=NotificationStatus.NOTIFIED_ONCE,
             new_status=AlarmStatus.ACTIVE,
             message=f"BUY {ticker}: price hit trigger {currency}{trigger:.2f}",
         )
 
-    if notification_status == NotificationStatus.NOTIFIED_ONCE and today["High"] >= target:
+    if (
+        notification_status == NotificationStatus.NOTIFIED_ONCE
+        and today["High"] >= target
+    ):
         return EvaluationResult(
             new_notification_status=NotificationStatus.NOTIFIED_TWICE,
             new_status=AlarmStatus.TRIGGERED,

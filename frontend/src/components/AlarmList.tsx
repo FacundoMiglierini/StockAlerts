@@ -1,47 +1,66 @@
-import { useState } from 'react'
-import type { Alarm, NotificationStatus } from '../types'
-import { STRATEGY_LABELS, STRATEGY_FIELDS, PRICE_FIELD_NAMES } from '../strategies'
-import { MARKET_LABELS, CURRENCY_SYMBOLS } from '../markets'
-import { TrashIcon, EmptyAlarmsIcon, ClockIcon, CheckCircleIcon } from './icons'
-import { ConfirmDialog } from './ConfirmDialog'
+import { useState } from 'react';
+import type { Alarm, NotificationStatus } from '../types';
+import {
+  STRATEGY_LABELS,
+  STRATEGY_FIELDS,
+  PRICE_FIELD_NAMES,
+} from '../strategies';
+import { MARKET_LABELS, CURRENCY_SYMBOLS } from '../markets';
+import {
+  TrashIcon,
+  EmptyAlarmsIcon,
+  ClockIcon,
+  CheckCircleIcon,
+} from './icons';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface Props {
-  alarms: Alarm[]
-  onSetStatus: (id: string, status: 'ACTIVE' | 'DISABLED') => void
-  onDelete: (id: string) => void
+  alarms: Alarm[];
+  onSetStatus: (id: string, status: 'ACTIVE' | 'DISABLED') => void;
+  onEdit: (alarm: Alarm) => void;
+  onDelete: (id: string) => void;
 }
 
 interface ParamStat {
-  label: string
-  value: string
+  label: string;
+  value: string;
 }
 
 function paramStats(alarm: Alarm): ParamStat[] {
-  const currency = CURRENCY_SYMBOLS[alarm.market]
-  const fields = STRATEGY_FIELDS[alarm.strategyType]
+  const currency = CURRENCY_SYMBOLS[alarm.market];
+  const fields = STRATEGY_FIELDS[alarm.strategyType];
   return Object.entries(alarm.params).map(([key, value]) => {
-    const label = fields.find((f) => f.name === key)?.label ?? key
-    return { label, value: PRICE_FIELD_NAMES.has(key) ? `${currency}${value}` : String(value) }
-  })
+    const label = fields.find((f) => f.name === key)?.label ?? key;
+    return {
+      label,
+      value: PRICE_FIELD_NAMES.has(key) ? `${currency}${value}` : String(value),
+    };
+  });
 }
 
 function formatTriggeredAt(triggeredAt: string): string {
-  return new Date(triggeredAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+  return new Date(triggeredAt).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 const NOTIFICATION_LABELS: Record<NotificationStatus, string> = {
   NOT_NOTIFIED: 'Not yet notified',
   NOTIFIED_ONCE: 'Notified once',
   NOTIFIED_TWICE: 'Notified twice',
-}
+};
 
 function NotificationStatusTag({ status }: { status: NotificationStatus }) {
   return (
-    <span className={`notification-status ${status !== 'NOT_NOTIFIED' ? 'is-notified' : ''}`}>
+    <span
+      className={`notification-status ${status !== 'NOT_NOTIFIED' ? 'is-notified' : ''}`}
+    >
       {status === 'NOT_NOTIFIED' ? <ClockIcon /> : <CheckCircleIcon />}
       {NOTIFICATION_LABELS[status]}
     </span>
-  )
+  );
 }
 
 function StatusBadge({ status }: { status: Alarm['status'] }) {
@@ -50,11 +69,11 @@ function StatusBadge({ status }: { status: Alarm['status'] }) {
       <span className="badge-dot" />
       {status.charAt(0) + status.slice(1).toLowerCase()}
     </span>
-  )
+  );
 }
 
-export function AlarmList({ alarms, onSetStatus, onDelete }: Props) {
-  const [pendingDelete, setPendingDelete] = useState<Alarm | null>(null)
+export function AlarmList({ alarms, onSetStatus, onEdit, onDelete }: Props) {
+  const [pendingDelete, setPendingDelete] = useState<Alarm | null>(null);
 
   if (alarms.length === 0) {
     return (
@@ -65,7 +84,7 @@ export function AlarmList({ alarms, onSetStatus, onDelete }: Props) {
         <h3>No alarms yet</h3>
         <p>Create your first alarm to get started.</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -83,12 +102,16 @@ export function AlarmList({ alarms, onSetStatus, onDelete }: Props) {
                 <strong className="ticker">{alarm.ticker}</strong>
                 <span className="tag">{MARKET_LABELS[alarm.market]}</span>
               </div>
-              <span className="alarm-strategy-label">{STRATEGY_LABELS[alarm.strategyType]}</span>
+              <span className="alarm-strategy-label">
+                {STRATEGY_LABELS[alarm.strategyType]}
+              </span>
             </div>
             <div className="alarm-status-col">
               <StatusBadge status={alarm.status} />
               {alarm.status === 'TRIGGERED' && alarm.triggeredAt && (
-                <span className="alarm-triggered-at">Triggered on {formatTriggeredAt(alarm.triggeredAt)}</span>
+                <span className="alarm-triggered-at">
+                  Triggered on {formatTriggeredAt(alarm.triggeredAt)}
+                </span>
               )}
             </div>
             <div className="alarm-param-grid">
@@ -103,16 +126,29 @@ export function AlarmList({ alarms, onSetStatus, onDelete }: Props) {
               <NotificationStatusTag status={alarm.notificationStatus} />
               <div className="alarm-actions">
                 {alarm.status !== 'ACTIVE' && (
-                  <button type="button" onClick={() => onSetStatus(alarm.id, 'ACTIVE')}>
+                  <button
+                    type="button"
+                    onClick={() => onSetStatus(alarm.id, 'ACTIVE')}
+                  >
                     {alarm.status === 'TRIGGERED' ? 'Re-arm' : 'Enable'}
                   </button>
                 )}
                 {alarm.status === 'ACTIVE' && (
-                  <button type="button" onClick={() => onSetStatus(alarm.id, 'DISABLED')}>
+                  <button
+                    type="button"
+                    onClick={() => onSetStatus(alarm.id, 'DISABLED')}
+                  >
                     Disable
                   </button>
                 )}
-                <button type="button" className="danger" onClick={() => setPendingDelete(alarm)}>
+                <button type="button" onClick={() => onEdit(alarm)}>
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={() => setPendingDelete(alarm)}
+                >
                   <TrashIcon size={13} />
                   Delete
                 </button>
@@ -129,11 +165,11 @@ export function AlarmList({ alarms, onSetStatus, onDelete }: Props) {
           danger
           onCancel={() => setPendingDelete(null)}
           onConfirm={() => {
-            onDelete(pendingDelete.id)
-            setPendingDelete(null)
+            onDelete(pendingDelete.id);
+            setPendingDelete(null);
           }}
         />
       )}
     </>
-  )
+  );
 }

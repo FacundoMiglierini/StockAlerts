@@ -21,7 +21,10 @@ import { MailerModule } from '../../common/mailer/mailer.module.js';
         secret: config.getOrThrow<string>('JWT_SECRET'),
         // Seconds, not a duration string (avoids the `ms`-string typing).
         signOptions: {
-          expiresIn: Number.parseInt(config.get<string>('JWT_EXPIRES_IN_SECONDS', '604800'), 10),
+          expiresIn: Number.parseInt(
+            config.get<string>('JWT_EXPIRES_IN_SECONDS', '604800'),
+            10,
+          ),
         },
       }),
     }),

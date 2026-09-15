@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { InvitationService } from './invitation.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
@@ -35,8 +46,15 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('me/password')
-  async changePassword(@CurrentUser() user: AuthenticatedUser, @Body() dto: ChangePasswordDto) {
-    await this.usersService.changePassword(user.id, dto.currentPassword, dto.newPassword);
+  async changePassword(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    await this.usersService.changePassword(
+      user.id,
+      dto.currentPassword,
+      dto.newPassword,
+    );
   }
 
   // No public self-registration: accounts are created either by the seed
@@ -63,8 +81,15 @@ export class UsersController {
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('invite')
-  async invite(@CurrentUser() admin: AuthenticatedUser, @Body() dto: CreateInvitationDto) {
-    await this.invitationService.createInvitation(admin.email, dto.email, dto.role);
+  async invite(
+    @CurrentUser() admin: AuthenticatedUser,
+    @Body() dto: CreateInvitationDto,
+  ) {
+    await this.invitationService.createInvitation(
+      admin.email,
+      dto.email,
+      dto.role,
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -76,14 +101,23 @@ export class UsersController {
     @Body() dto: UpdateUserStatusDto,
   ) {
     const user = await this.usersService.setActive(admin.id, id, dto.active);
-    return { id: user.id, email: user.email, role: user.role, active: user.active, isDefaultAdmin: user.isDefaultAdmin };
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      active: user.active,
+      isDefaultAdmin: user.isDefaultAdmin,
+    };
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  async remove(@CurrentUser() admin: AuthenticatedUser, @Param('id') id: string) {
+  async remove(
+    @CurrentUser() admin: AuthenticatedUser,
+    @Param('id') id: string,
+  ) {
     await this.usersService.remove(admin.id, id);
   }
 }

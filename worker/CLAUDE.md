@@ -251,6 +251,21 @@ installed, no separate `python3.13 -m venv` step needed. Requires Python ≥
 3.11 at a minimum (uses `enum.StrEnum`, added in 3.11, plus `X | None`
 union syntax and `dict[str, ...]` generics) if you ever change the pin.
 
+## Formatting
+
+`black` (dev dependency group) formats the whole tree — no config beyond
+its defaults:
+
+```bash
+uv run black worker tests tests_integration
+```
+
+If `uv run pytest`/`uv run black` fails with `bad interpreter: .../<old
+dir name>/.venv/bin/python3: no such file or directory`, the `.venv` was
+created under a since-renamed project path and its console-script shebangs
+are stale — `uv run python -m pytest` (module form, bypasses the shebang)
+works around it, or delete `.venv` and re-`uv sync` to fix it properly.
+
 ## Scheduling: long-lived loop (chosen), not host cron
 
 `docker-compose.yml`'s `worker` service runs `python -m worker.main` — a

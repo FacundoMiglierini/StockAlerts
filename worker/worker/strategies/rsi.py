@@ -8,7 +8,9 @@ from .indicators import rsi as compute_rsi
 
 
 @single_shot
-def evaluate(ticker: str, params: dict, prices: pd.DataFrame, market: Market) -> str | None:
+def evaluate(
+    ticker: str, params: dict, prices: pd.DataFrame, market: Market
+) -> str | None:
     series = compute_rsi(prices["Close"], params["period"])
     latest = series.iloc[-1]
     if pd.isna(latest):

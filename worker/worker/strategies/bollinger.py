@@ -9,7 +9,9 @@ from .indicators import bollinger_bands
 
 
 @single_shot
-def evaluate(ticker: str, params: dict, prices: pd.DataFrame, market: Market) -> str | None:
+def evaluate(
+    ticker: str, params: dict, prices: pd.DataFrame, market: Market
+) -> str | None:
     lower, upper = bollinger_bands(prices["Close"], params["period"], params["stdDev"])
     close = prices["Close"].iloc[-1]
     if pd.isna(lower.iloc[-1]) or pd.isna(upper.iloc[-1]):

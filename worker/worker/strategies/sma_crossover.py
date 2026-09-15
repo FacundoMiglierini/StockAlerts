@@ -8,7 +8,9 @@ from .indicators import sma
 
 
 @single_shot
-def evaluate(ticker: str, params: dict, prices: pd.DataFrame, market: Market) -> str | None:
+def evaluate(
+    ticker: str, params: dict, prices: pd.DataFrame, market: Market
+) -> str | None:
     fast = sma(prices["Close"], params["fastPeriod"])
     slow = sma(prices["Close"], params["slowPeriod"])
     if len(fast.dropna()) < 2 or len(slow.dropna()) < 2:

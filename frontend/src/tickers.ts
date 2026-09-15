@@ -1,8 +1,8 @@
-import type { Market } from './types'
+import type { Market } from './types';
 
 export interface TickerOption {
-  symbol: string
-  name: string
+  symbol: string;
+  name: string;
 }
 
 // Static curated shortlists for the ticker autocomplete dropdown in
@@ -148,57 +148,65 @@ export const TICKERS: Record<Market, TickerOption[]> = {
     { symbol: 'COIN', name: 'Coinbase Global Inc. (CEDEAR)' },
     { symbol: 'PEP', name: 'PepsiCo Inc. (CEDEAR)' },
   ],
+  // Stored WITHOUT the "-USD" pair suffix, same reasoning as BYMA above:
+  // the worker's resolve_symbol() (worker/worker/market.py) always appends
+  // "-USD" itself for any CRYPTO alarm — baking it in here double-suffixes
+  // (yfinance sees "BTC-USD-USD") and breaks the fetch.
   CRYPTO: [
-    { symbol: 'BTC-USD', name: 'Bitcoin' },
-    { symbol: 'ETH-USD', name: 'Ethereum' },
-    { symbol: 'USDT-USD', name: 'Tether' },
-    { symbol: 'BNB-USD', name: 'BNB' },
-    { symbol: 'SOL-USD', name: 'Solana' },
-    { symbol: 'USDC-USD', name: 'USD Coin' },
-    { symbol: 'XRP-USD', name: 'XRP' },
-    { symbol: 'DOGE-USD', name: 'Dogecoin' },
-    { symbol: 'ADA-USD', name: 'Cardano' },
-    { symbol: 'TRX-USD', name: 'TRON' },
-    { symbol: 'AVAX-USD', name: 'Avalanche' },
-    { symbol: 'LINK-USD', name: 'Chainlink' },
-    { symbol: 'DOT-USD', name: 'Polkadot' },
-    { symbol: 'MATIC-USD', name: 'Polygon' },
-    { symbol: 'LTC-USD', name: 'Litecoin' },
-    { symbol: 'SHIB-USD', name: 'Shiba Inu' },
-    { symbol: 'BCH-USD', name: 'Bitcoin Cash' },
-    { symbol: 'UNI-USD', name: 'Uniswap' },
-    { symbol: 'ATOM-USD', name: 'Cosmos' },
-    { symbol: 'XLM-USD', name: 'Stellar' },
+    { symbol: 'BTC', name: 'Bitcoin' },
+    { symbol: 'ETH', name: 'Ethereum' },
+    { symbol: 'USDT', name: 'Tether' },
+    { symbol: 'BNB', name: 'BNB' },
+    { symbol: 'SOL', name: 'Solana' },
+    { symbol: 'USDC', name: 'USD Coin' },
+    { symbol: 'XRP', name: 'XRP' },
+    { symbol: 'DOGE', name: 'Dogecoin' },
+    { symbol: 'ADA', name: 'Cardano' },
+    { symbol: 'TRX', name: 'TRON' },
+    { symbol: 'AVAX', name: 'Avalanche' },
+    { symbol: 'LINK', name: 'Chainlink' },
+    { symbol: 'DOT', name: 'Polkadot' },
+    { symbol: 'MATIC', name: 'Polygon' },
+    { symbol: 'LTC', name: 'Litecoin' },
+    { symbol: 'SHIB', name: 'Shiba Inu' },
+    { symbol: 'BCH', name: 'Bitcoin Cash' },
+    { symbol: 'UNI', name: 'Uniswap' },
+    { symbol: 'ATOM', name: 'Cosmos' },
+    { symbol: 'XLM', name: 'Stellar' },
   ],
-}
+};
 
 // Matches on symbol OR name (company/coin name), tokenized so a multi-word
 // query like "apple inc" or, for crypto, "coin" (as in "USD Coin") matches
 // regardless of which field the words land in. Exact/prefix symbol matches
 // rank above name matches so typing a real ticker still surfaces it first.
-export function searchTickers(market: Market, query: string, limit = 8): TickerOption[] {
-  const list = TICKERS[market]
-  const trimmed = query.trim()
-  if (!trimmed) return list.slice(0, limit)
+export function searchTickers(
+  market: Market,
+  query: string,
+  limit = 8,
+): TickerOption[] {
+  const list = TICKERS[market];
+  const trimmed = query.trim();
+  if (!trimmed) return list.slice(0, limit);
 
-  const q = trimmed.toUpperCase()
-  const tokens = q.split(/\s+/).filter(Boolean)
+  const q = trimmed.toUpperCase();
+  const tokens = q.split(/\s+/).filter(Boolean);
 
   function rank(option: TickerOption): number {
-    const symbol = option.symbol.toUpperCase()
-    const name = option.name.toUpperCase()
-    if (symbol === q) return 0
-    if (symbol.startsWith(q)) return 1
-    if (name.startsWith(q)) return 2
-    if (name.split(/\s+/).some((word) => word.startsWith(q))) return 3
-    return 4
+    const symbol = option.symbol.toUpperCase();
+    const name = option.name.toUpperCase();
+    if (symbol === q) return 0;
+    if (symbol.startsWith(q)) return 1;
+    if (name.startsWith(q)) return 2;
+    if (name.split(/\s+/).some((word) => word.startsWith(q))) return 3;
+    return 4;
   }
 
   return list
     .filter((option) => {
-      const haystack = `${option.symbol} ${option.name}`.toUpperCase()
-      return tokens.every((token) => haystack.includes(token))
+      const haystack = `${option.symbol} ${option.name}`.toUpperCase();
+      return tokens.every((token) => haystack.includes(token));
     })
     .sort((a, b) => rank(a) - rank(b))
-    .slice(0, limit)
+    .slice(0, limit);
 }

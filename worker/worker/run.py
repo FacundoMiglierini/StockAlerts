@@ -30,33 +30,54 @@ def run_once() -> None:
             prices = provider.get_daily_history(symbol, config.PRICE_HISTORY_PERIOD)
         except Exception:
             logger.exception(
-                "Failed to fetch price history for %s, skipping its %d alarm(s)", symbol, len(alarms)
+                "Failed to fetch price history for %s, skipping its %d alarm(s)",
+                symbol,
+                len(alarms),
             )
             continue
 
         for alarm in alarms:
             evaluate = STRATEGY_REGISTRY.get(alarm.strategy_type)
             if evaluate is None:
-                logger.error("Unknown strategy type %s for alarm %s", alarm.strategy_type, alarm.id)
+                logger.error(
+                    "Unknown strategy type %s for alarm %s",
+                    alarm.strategy_type,
+                    alarm.id,
+                )
                 continue
 
             try:
-                result = evaluate(alarm.ticker, alarm.params, prices, alarm.notification_status, alarm.market)
+                result = evaluate(
+                    alarm.ticker,
+                    alarm.params,
+                    prices,
+                    alarm.notification_status,
+                    alarm.market,
+                )
             except Exception:
-                logger.exception("Strategy %s failed for alarm %s (%s)", alarm.strategy_type, alarm.id, symbol)
+                logger.exception(
+                    "Strategy %s failed for alarm %s (%s)",
+                    alarm.strategy_type,
+                    alarm.id,
+                    symbol,
+                )
                 continue
 
             if result is None:
                 continue
 
             db.apply_alarm_result(
-                alarm.id, notification_status=result.new_notification_status, status=result.new_status
+                alarm.id,
+                notification_status=result.new_notification_status,
+                status=result.new_status,
             )
             logger.info("Alarm %s triggered: %s", alarm.id, result.message)
 
             user_contact = db.fetch_user_contact(alarm.user_id)
             if not user_contact:
-                logger.error("No user found for alarm %s (userId=%s)", alarm.id, alarm.user_id)
+                logger.error(
+                    "No user found for alarm %s (userId=%s)", alarm.id, alarm.user_id
+                )
                 continue
             contact = Contact(email=user_contact.email, channels=user_contact.channels)
             notifier.send(contact, f"Stock alert: {alarm.ticker}", result.message)

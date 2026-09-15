@@ -44,7 +44,9 @@ class TestRsi:
 
 class TestMacd:
     def test_flat_series_has_no_signal(self):
-        macd_line, signal_line = macd(pd.Series([10.0] * 30), fast_period=12, slow_period=26, signal_period=9)
+        macd_line, signal_line = macd(
+            pd.Series([10.0] * 30), fast_period=12, slow_period=26, signal_period=9
+        )
         assert macd_line.iloc[-1] == 0.0
         assert signal_line.iloc[-1] == 0.0
 

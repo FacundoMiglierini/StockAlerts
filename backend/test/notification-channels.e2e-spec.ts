@@ -52,10 +52,16 @@ describe('Notification channels (e2e)', () => {
       .get('/users/me/channels')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    expect(channels.body).toEqual([{ type: 'TELEGRAM', externalId: '123456789' }]);
+    expect(channels.body).toEqual([
+      { type: 'TELEGRAM', externalId: '123456789' },
+    ]);
 
-    const me = await request(app.getHttpServer()).get('/users/me').set('Authorization', `Bearer ${token}`);
-    expect(me.body.channels).toEqual([{ type: 'TELEGRAM', externalId: '123456789' }]);
+    const me = await request(app.getHttpServer())
+      .get('/users/me')
+      .set('Authorization', `Bearer ${token}`);
+    expect(me.body.channels).toEqual([
+      { type: 'TELEGRAM', externalId: '123456789' },
+    ]);
   });
 
   it('re-linking the same channel type updates rather than duplicates', async () => {

@@ -20,7 +20,9 @@ describe('NotificationChannelsService', () => {
 
   beforeEach(() => {
     prisma = createPrismaMock();
-    service = new NotificationChannelsService(prisma as unknown as PrismaService);
+    service = new NotificationChannelsService(
+      prisma as unknown as PrismaService,
+    );
   });
 
   describe('listForUser', () => {
@@ -38,11 +40,24 @@ describe('NotificationChannelsService', () => {
 
   describe('link', () => {
     it('upserts on the (userId, type) compound key, so linking twice updates rather than duplicates', async () => {
-      await service.link(USER_ID, NotificationChannelType.TELEGRAM, '123456789');
+      await service.link(
+        USER_ID,
+        NotificationChannelType.TELEGRAM,
+        '123456789',
+      );
 
       expect(prisma.notificationChannel.upsert).toHaveBeenCalledWith({
-        where: { userId_type: { userId: USER_ID, type: NotificationChannelType.TELEGRAM } },
-        create: { userId: USER_ID, type: NotificationChannelType.TELEGRAM, externalId: '123456789' },
+        where: {
+          userId_type: {
+            userId: USER_ID,
+            type: NotificationChannelType.TELEGRAM,
+          },
+        },
+        create: {
+          userId: USER_ID,
+          type: NotificationChannelType.TELEGRAM,
+          externalId: '123456789',
+        },
         update: { externalId: '123456789' },
       });
     });

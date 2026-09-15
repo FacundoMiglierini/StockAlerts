@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseEnumPipe, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseEnumPipe,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { NotificationChannelsService } from './notification-channels.service.js';
 import { LinkChannelDto } from './dto/link-channel.dto.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
@@ -21,7 +32,8 @@ export class NotificationChannelsController {
   @Put(':type')
   link(
     @CurrentUser() user: AuthenticatedUser,
-    @Param('type', new ParseEnumPipe(NotificationChannelType)) type: NotificationChannelType,
+    @Param('type', new ParseEnumPipe(NotificationChannelType))
+    type: NotificationChannelType,
     @Body() dto: LinkChannelDto,
   ) {
     return this.channelsService.link(user.id, type, dto.externalId);
@@ -31,7 +43,8 @@ export class NotificationChannelsController {
   @Delete(':type')
   async unlink(
     @CurrentUser() user: AuthenticatedUser,
-    @Param('type', new ParseEnumPipe(NotificationChannelType)) type: NotificationChannelType,
+    @Param('type', new ParseEnumPipe(NotificationChannelType))
+    type: NotificationChannelType,
   ) {
     await this.channelsService.unlink(user.id, type);
   }

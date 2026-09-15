@@ -25,7 +25,11 @@ class FallbackPriceProvider:
             try:
                 return self._primary.get_daily_history(ticker, period)
             except Exception:
-                logger.warning("Primary price provider failed for %s, falling back", ticker, exc_info=True)
+                logger.warning(
+                    "Primary price provider failed for %s, falling back",
+                    ticker,
+                    exc_info=True,
+                )
         return self._fallback.get_daily_history(ticker, period)
 
 

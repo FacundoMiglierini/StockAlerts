@@ -1,21 +1,21 @@
-import type { StrategyType } from './types'
+import type { StrategyType } from './types';
 
 // Reasonably standard email shape check — mirrors the intent of the
 // backend's class-validator @IsEmail() closely enough for client-side
 // feedback; the backend remains the source of truth.
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function isValidEmail(value: string): boolean {
-  return EMAIL_RE.test(value.trim())
+  return EMAIL_RE.test(value.trim());
 }
 
 // Mirrors backend/src/modules/users/dto/create-user.dto.ts's @MinLength(8).
 // Login itself doesn't enforce a minimum (existing passwords could predate
 // this rule), so this is only used for stricter forms if ever needed.
-export const MIN_PASSWORD_LENGTH = 8
+export const MIN_PASSWORD_LENGTH = 8;
 
 export function isValidTicker(value: string): boolean {
-  return /^[A-Z0-9.-]{1,10}$/.test(value.trim().toUpperCase())
+  return /^[A-Z0-9.-]{1,10}$/.test(value.trim().toUpperCase());
 }
 
 // Telegram chat ids are plain integers — negative for groups/channels
@@ -25,7 +25,7 @@ export function isValidTicker(value: string): boolean {
 // to Telegram's API) — this is just a client-side sanity check to catch
 // obviously wrong input (letters, stray whitespace, an unedited placeholder).
 export function isValidTelegramChatId(value: string): boolean {
-  return /^-?\d{5,15}$/.test(value.trim())
+  return /^-?\d{5,15}$/.test(value.trim());
 }
 
 // Cross-field sanity checks beyond the per-field min/max already declared
@@ -39,31 +39,32 @@ export function validateStrategyParams(
 ): string | null {
   switch (strategyType) {
     case 'MANUAL_THRESHOLD':
-      if (!(params.trigger > 0)) return 'Trigger price must be greater than 0'
-      if (!(params.target > 0)) return 'Target price must be greater than 0'
-      return null
+      if (!(params.trigger > 0)) return 'Trigger price must be greater than 0';
+      if (!(params.target > 0)) return 'Target price must be greater than 0';
+      return null;
     case 'SMA_CROSSOVER':
       if (!(params.fastPeriod < params.slowPeriod)) {
-        return 'Fast period must be smaller than slow period'
+        return 'Fast period must be smaller than slow period';
       }
-      return null
+      return null;
     case 'RSI':
       if (!(params.oversold < params.overbought)) {
-        return 'Oversold threshold must be smaller than overbought threshold'
+        return 'Oversold threshold must be smaller than overbought threshold';
       }
-      return null
+      return null;
     case 'MACD':
       if (!(params.fastPeriod < params.slowPeriod)) {
-        return 'Fast period must be smaller than slow period'
+        return 'Fast period must be smaller than slow period';
       }
-      return null
+      return null;
     case 'BOLLINGER':
-      if (!(params.stdDev > 0)) return 'Standard deviations must be greater than 0'
-      return null
+      if (!(params.stdDev > 0))
+        return 'Standard deviations must be greater than 0';
+      return null;
     case 'SUPPORT_RESISTANCE':
-      if (!(params.lookbackDays > 0)) return 'Lookback must be greater than 0'
-      return null
+      if (!(params.lookbackDays > 0)) return 'Lookback must be greater than 0';
+      return null;
     default:
-      return null
+      return null;
   }
 }

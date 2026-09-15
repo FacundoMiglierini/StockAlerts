@@ -1,5 +1,10 @@
 import { randomBytes, createHash } from 'node:crypto';
-import { BadRequestException, ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
@@ -31,7 +36,11 @@ export class InvitationService {
     private readonly config: ConfigService,
   ) {}
 
-  async createInvitation(invitedByEmail: string, email: string, role: Role): Promise<void> {
+  async createInvitation(
+    invitedByEmail: string,
+    email: string,
+    role: Role,
+  ): Promise<void> {
     const existingUser = await this.usersService.findByEmail(email);
     if (existingUser) {
       throw new ConflictException('A user with this email already exists');
@@ -39,7 +48,9 @@ export class InvitationService {
 
     // A fresh invite supersedes any still-outstanding one for the same
     // email — only the link in the most recent email should work.
-    await this.prisma.userInvitation.deleteMany({ where: { email, acceptedAt: null } });
+    await this.prisma.userInvitation.deleteMany({
+      where: { email, acceptedAt: null },
+    });
 
     const token = randomBytes(TOKEN_BYTES).toString('hex');
     await this.prisma.userInvitation.create({
@@ -57,8 +68,13 @@ export class InvitationService {
     try {
       await this.mailer.sendInviteEmail(email, acceptUrl, invitedByEmail);
     } catch (error) {
-      this.logger.error(`Failed to send invite email to ${email}`, error as Error);
-      throw new BadRequestException('Could not send the invite email — check the mail configuration and try again');
+      this.logger.error(
+        `Failed to send invite email to ${email}`,
+        error as Error,
+      );
+      throw new BadRequestException(
+        'Could not send the invite email — check the mail configuration and try again',
+      );
     }
   }
 
@@ -68,7 +84,9 @@ export class InvitationService {
     });
 
     if (!record || record.acceptedAt || record.expiresAt < new Date()) {
-      throw new BadRequestException('This invite link is invalid or has expired');
+      throw new BadRequestException(
+        'This invite link is invalid or has expired',
+      );
     }
 
     const existingUser = await this.usersService.findByEmail(record.email);
@@ -81,7 +99,10 @@ export class InvitationService {
       this.prisma.user.create({
         data: { email: record.email, passwordHash, role: record.role },
       }),
-      this.prisma.userInvitation.update({ where: { id: record.id }, data: { acceptedAt: new Date() } }),
+      this.prisma.userInvitation.update({
+        where: { id: record.id },
+        data: { acceptedAt: new Date() },
+      }),
     ]);
   }
 }

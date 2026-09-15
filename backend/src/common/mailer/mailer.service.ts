@@ -20,7 +20,10 @@ export class MailerService {
 
   constructor(private readonly config: ConfigService) {
     const host = this.config.getOrThrow<string>('BACKEND_MAIL_HOST');
-    const port = Number.parseInt(this.config.getOrThrow<string>('BACKEND_MAIL_PORT'), 10);
+    const port = Number.parseInt(
+      this.config.getOrThrow<string>('BACKEND_MAIL_PORT'),
+      10,
+    );
     const username = this.config.getOrThrow<string>('BACKEND_MAIL_USERNAME');
     const email = this.config.getOrThrow<string>('BACKEND_MAIL_EMAIL');
     const password = this.config.getOrThrow<string>('BACKEND_MAIL_PASSWORD');
@@ -44,7 +47,11 @@ export class MailerService {
     this.logger.log(`Sent password reset email to ${to}`);
   }
 
-  async sendInviteEmail(to: string, acceptUrl: string, invitedByEmail: string): Promise<void> {
+  async sendInviteEmail(
+    to: string,
+    acceptUrl: string,
+    invitedByEmail: string,
+  ): Promise<void> {
     await this.transporter.sendMail({
       from: this.fromAddress,
       to,
