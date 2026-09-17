@@ -84,14 +84,45 @@ has been run against the Mini PC yet; local dev has only ever exercised
    integration is ever flipped on. Leave `FRONTEND_URL` at its default for
    now — step 6 below comes back to it once the Netlify URL actually
    exists.
-1. `docker compose up -d --build postgres backend worker` — **deliberately
-   not `frontend`**: that service is only for local dev against this
-   repo's own nginx container; the real frontend is Netlify-hosted (Part
-   B), so running it here too would just burn RAM for a container nothing
-   points at. Migrations apply automatically
-   (`docker-entrypoint.sh` runs `prisma migrate deploy` on backend boot —
-   see `backend/CLAUDE.md`'s Docker section), so no separate migration
-   step is needed.
+1. `docker compose up -d --build postgres backend` and separately
+   `docker compose build worker` — **deliberately not `frontend`**: that
+   service is only for local dev against this repo's own nginx container;
+   the real frontend is Netlify-hosted (Part B), so running it here too
+   would just burn RAM for a container nothing points at. `worker` is
+   built but never started via `up -d` in production — see step 1a below
+   for why. Migrations apply automatically (`docker-entrypoint.sh` runs
+   `prisma migrate deploy` on backend boot — see `backend/CLAUDE.md`'s
+   Docker section), so no separate migration step is needed.
+
+1a. **Worker runs via host cron, not as a persistent container.**
+    `worker/main.py`'s long-running loop (`docker compose up`'s default,
+    used in local dev) has no timeout around its price-fetch call
+    (`price_provider`'s default yfinance path) — if a single fetch hangs,
+    that loop iteration never returns, and since the process doesn't
+    crash (just blocks forever), `restart: unless-stopped` never kicks in
+    to notice or recover: every future hourly run is silently dead until
+    someone happens to check. A cron-triggered one-shot avoids this
+    entirely — each invocation is a fresh process, so a hung run only
+    costs that one run, not all subsequent ones. `worker/run.py` is
+    already the cron-friendly single-pass entrypoint (see
+    `worker/CLAUDE.md`). Set up the Mini PC's crontab once:
+    ```
+    0 * * * * cd /path/to/stock-alerts && /usr/bin/docker compose run --rm worker uv run --no-dev python -m worker.run >> /path/to/stockalerts-worker-cron.log 2>&1
+    ```
+    Two details that aren't obvious from the command itself:
+    - **`uv run`, not bare `python`.** Overriding the service's `CMD` (as
+      `docker compose run ... <cmd>` does) bypasses the image's normal
+      entrypoint, so without `uv run` you get the base image's system
+      Python — which has none of the project's dependencies installed —
+      instead of the `uv`-managed venv at `/app/.venv`.
+    - **`--no-dev`.** Without it, `uv run` syncs dev-dependencies
+      (`black`, `pygments`, ...) into the ephemeral container on every
+      single invocation, re-downloading them from PyPI every hour for
+      tools the worker never uses at runtime.
+    Adjust the `0 * * * *` schedule to match `WORKER_POLL_INTERVAL_SECONDS`
+    if that's ever changed from its default hourly cadence — the two are
+    independent knobs (one drives the old loop-mode container, the other
+    drives cron) and only stay meaningful together if kept in sync.
 2. Generate a **reusable, non-ephemeral** Tailscale auth key at
    https://login.tailscale.com/admin/settings/keys, set it as `TS_AUTHKEY`
    in the Mini PC's `.env`.

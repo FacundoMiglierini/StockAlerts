@@ -20,8 +20,8 @@ worker/
     registry.py           StrategyType string -> evaluate() function
     <strategy>.py          one module per StrategyType, `evaluate(ticker, params, prices, notification_status, market) -> EvaluationResult | None`
   notifications/         Notifier port: email (SMTP) + Telegram, both sent on every trigger
-  run.py                one evaluation pass — `python -m worker.run` (cron-friendly)
-  main.py               loop wrapper around run.py — `python -m worker.main` (docker-compose)
+  run.py                one evaluation pass — `python -m worker.run`; what production's host crontab actually invokes (see root CLAUDE.md's "Deploying for free" step 1a) — a fresh process every run means a single hung price-fetch can't take down all future runs
+  main.py               loop wrapper around run.py — `python -m worker.main`; only used in local dev's `docker compose up` for convenience, never started in production
 tests/                  unit tests (pytest, no DB) — mirrors the worker/ package layout
 tests_integration/      db.py against a real Postgres — see Testing below
 ```

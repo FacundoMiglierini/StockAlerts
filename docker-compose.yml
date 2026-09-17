@@ -60,6 +60,12 @@ services:
     ports:
       - "3000:3000"
 
+  # Local dev: a plain `docker compose up` runs this as a persistent
+  # service (worker/main.py's loop, restart: unless-stopped applies).
+  # Production (the Mini PC): never started via `up -d` — a host crontab
+  # entry runs `docker compose run --rm worker uv run --no-dev python -m
+  # worker.run` (worker/run.py's single pass) once per hour instead. See
+  # root CLAUDE.md's "Deploying for free" section, Part A step 1a, for why.
   worker:
     build: ./worker
     restart: unless-stopped
