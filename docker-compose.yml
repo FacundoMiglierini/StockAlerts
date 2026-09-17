@@ -105,7 +105,6 @@ services:
   tailscale:
     image: tailscale/tailscale:latest
     profiles: ["funnel"]
-    hostname: stock-alerts
     network_mode: "service:backend"
     environment:
       # Deliberately NOT a required (":?") variable, unlike JWT_SECRET
@@ -117,6 +116,12 @@ services:
       # with a clear error in its own logs — see root CLAUDE.md.
       TS_AUTHKEY: ${TS_AUTHKEY:-}
       TS_STATE_DIR: /var/lib/tailscale
+      # The tailnet node's name — NOT the container's OS-level `hostname:`
+      # field, which would conflict with `network_mode: "service:backend"`
+      # (can't set your own hostname while sharing another container's
+      # network namespace; Docker errors "conflicting options: hostname
+      # and the network mode").
+      TS_HOSTNAME: stock-alerts
     volumes:
       - tailscale_state:/var/lib/tailscale
     cap_add:
