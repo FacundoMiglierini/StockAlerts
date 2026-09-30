@@ -1,19 +1,24 @@
-import type { Alarm, AlarmStatus, Market } from '../types';
+import type { Alarm, AlarmStatus, Market, Portfolio } from '../types';
 import { MARKET_LABELS } from '../markets';
 import { FilterIcon } from './icons';
 
 export type DateRangeFilter = 'ALL' | '7' | '30' | '90';
 
+// 'NONE' = alarms created one by one; any other value is a portfolio id.
+export type PortfolioFilter = 'ALL' | 'NONE' | string;
+
 export interface AlarmFilters {
   market: Market | 'ALL';
   status: AlarmStatus | 'ALL';
   dateRange: DateRangeFilter;
+  portfolio: PortfolioFilter;
 }
 
 export const DEFAULT_FILTERS: AlarmFilters = {
   market: 'ALL',
   status: 'ALL',
   dateRange: 'ALL',
+  portfolio: 'ALL',
 };
 
 const STATUS_LABELS: Record<AlarmStatus, string> = {
@@ -44,6 +49,11 @@ export function applyAlarmFilters(
       return false;
     if (cutoff !== null && new Date(alarm.createdAt).getTime() < cutoff)
       return false;
+    if (
+      filters.portfolio !== 'ALL' &&
+      (alarm.portfolioId ?? 'NONE') !== filters.portfolio
+    )
+      return false;
     return true;
   });
 }
@@ -51,13 +61,15 @@ export function applyAlarmFilters(
 interface Props {
   filters: AlarmFilters;
   onChange: (filters: AlarmFilters) => void;
+  portfolios: Portfolio[];
 }
 
-export function FiltersBar({ filters, onChange }: Props) {
+export function FiltersBar({ filters, onChange, portfolios }: Props) {
   const isActive =
     filters.market !== 'ALL' ||
     filters.status !== 'ALL' ||
-    filters.dateRange !== 'ALL';
+    filters.dateRange !== 'ALL' ||
+    filters.portfolio !== 'ALL';
 
   return (
     <div className="filters-bar">
@@ -124,6 +136,26 @@ export function FiltersBar({ filters, onChange }: Props) {
           </option>
         ))}
       </select>
+      {portfolios.length > 0 && (
+        <select
+          className={
+            filters.portfolio !== 'ALL'
+              ? 'filter-select is-active'
+              : 'filter-select'
+          }
+          value={filters.portfolio}
+          onChange={(e) => onChange({ ...filters, portfolio: e.target.value })}
+          aria-label="Filter by portfolio"
+        >
+          <option value="ALL">All portfolios</option>
+          <option value="NONE">Not in a portfolio</option>
+          {portfolios.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+      )}
       {isActive && (
         <button
           type="button"

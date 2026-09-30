@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import type { Portfolio } from '../types';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -14,6 +15,7 @@ export function PortfoliosPage() {
   const [importing, setImporting] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Portfolio | null>(null);
   const { showSuccess, showError } = useToast();
+  const navigate = useNavigate();
 
   async function loadPortfolios() {
     setError(null);
@@ -108,14 +110,24 @@ export function PortfoliosPage() {
                     })}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="danger"
-                  onClick={() => setPendingDelete(p)}
-                >
-                  <TrashIcon size={13} />
-                  Delete
-                </button>
+                <div className="portfolio-actions">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(`/alarms?portfolio=${encodeURIComponent(p.id)}`)
+                    }
+                  >
+                    View alarms
+                  </button>
+                  <button
+                    type="button"
+                    className="danger"
+                    onClick={() => setPendingDelete(p)}
+                  >
+                    <TrashIcon size={13} />
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

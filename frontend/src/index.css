@@ -1014,6 +1014,23 @@ textarea::placeholder {
   font-weight: 700;
 }
 
+.portfolio-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 11rem;
+}
+
+.portfolio-tag > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portfolio-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .portfolio-meta {
   margin-top: 0.2rem;
   font-size: 0.8rem;
