@@ -92,6 +92,33 @@ describe('PortfoliosService', () => {
       expect(result).toMatchObject({ id: 'pf-1', alarmCount: 2 });
     });
 
+    it('creates SELL-phase rows past their BUY notification, BUY rows with the default', async () => {
+      prisma.tx.portfolio.create.mockResolvedValue({ id: 'pf-1' });
+
+      await service.create(USER_ID, {
+        name: 'Open positions',
+        recipe: RecipeType.EXPLICIT_THRESHOLDS,
+        rows: [
+          {
+            ticker: 'HL',
+            market: 'BYMA',
+            trigger: 41380,
+            target: 49656,
+            phase: 'SELL',
+          },
+          { ticker: 'XLF', market: 'BYMA', trigger: 29920, target: 34408 },
+        ],
+      });
+
+      const [{ data }] = prisma.tx.alarm.createMany.mock.calls[0];
+      expect(data[0]).toMatchObject({
+        ticker: 'HL',
+        notificationStatus: 'NOTIFIED_ONCE',
+      });
+      expect(data[1]).not.toHaveProperty('notificationStatus');
+      expect(data[0]).not.toHaveProperty('phase');
+    });
+
     it('refuses to write anything when any row is invalid', async () => {
       await expect(
         service.create(USER_ID, {

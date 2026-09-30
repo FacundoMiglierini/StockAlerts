@@ -225,6 +225,15 @@ export function PortfolioImportForm({ onCreated }: Props) {
         entered bare (<code>AGRO</code>, not <code>AGRO.BA</code>;{' '}
         <code>BTC</code>, not <code>BTC-USD</code>) and <code>market</code> is
         USA, CRYPTO or BYMA. Use dots for decimals.
+        {recipe === 'EXPLICIT_THRESHOLDS' && (
+          <>
+            {' '}
+            A ticker may repeat with different trigger/target (one row per
+            ladder step). Optional <code>phase</code> column: <code>BUY</code>{' '}
+            (default) or <code>SELL</code> for a position you already bought —
+            it skips the buy alert and only waits for the target.
+          </>
+        )}
         {recipe === 'DRAWDOWN_LADDER' &&
           ' Each ticker gets one BUY/SELL pair per entry: trigger = reference × (1 − drop)^step, target = trigger × (1 + gain). Reference is fixed now, e.g. the last local high — the ladder does not follow the price afterwards.'}
       </p>
@@ -290,6 +299,7 @@ export function PortfolioImportForm({ onCreated }: Props) {
                       <th>Ticker</th>
                       <th>Market</th>
                       <th>Step</th>
+                      <th>Phase</th>
                       <th>Buy at</th>
                       <th>Sell at</th>
                     </tr>
@@ -300,6 +310,7 @@ export function PortfolioImportForm({ onCreated }: Props) {
                         <td className="admin-table-email">{a.ticker}</td>
                         <td>{a.market}</td>
                         <td className="mono">{a.rung ?? '—'}</td>
+                        <td>{a.phase === 'SELL' ? 'Sell (bought)' : 'Buy'}</td>
                         <td className="mono">
                           {CURRENCY_SYMBOLS[a.market]}
                           {formatPrice(a.params.trigger)}

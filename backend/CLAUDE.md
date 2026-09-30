@@ -183,7 +183,13 @@ non-empty. Both recipes emit `MANUAL_THRESHOLD` alarms (BUY at `trigger`,
 then SELL at `target`), and every generated alarm is re-checked against
 `strategyParamsSchemas`:
 
-- `EXPLICIT_THRESHOLDS`: row = `ticker, market, trigger, target`, 1 alarm.
+- `EXPLICIT_THRESHOLDS`: row = `ticker, market, trigger, target[, phase]`,
+  1 alarm. A ticker may repeat (one row per rung — the old CSV's shape);
+  only an identical `ticker+market+trigger+target` row is a duplicate.
+  `phase` is `BUY` (default, also for a blank cell) or `SELL` — SELL is an
+  already-bought position, created with `notificationStatus =
+  NOTIFIED_ONCE` so the worker's `manual_threshold` only watches `target`
+  (the old CSV's `status=1, notified=1`).
 - `DRAWDOWN_LADDER`: row = `ticker, market, reference`, plus import-wide
   `options { dropPct, gainPct, entries }` (fractions, `entries` 1–10). This
   is the old script's `--newtrades`: `trigger_i = reference × (1 − dropPct)^i`,
@@ -197,7 +203,9 @@ as the frontend — the worker's `resolve_symbol()` appends `.BA`/`-USD`),
 so a BYMA ticker ending `.BA` or a CRYPTO ticker ending `-USD` is
 rejected rather than silently stripped; `market` is case-insensitive;
 numeric cells may be numbers or numeric strings (raw CSV cells pass
-through); duplicate `ticker+market` rows in one import are rejected; at
+through); duplicate rows in one import are rejected (for the ladder, any
+second row for the same `ticker+market`, since each row already expands
+to every rung); at
 most 500 rows and 500 resulting alarms per import. The backend can't tell
 whether a rung's trigger is already above the current price — such a rung
 fires on the worker's next tick, so reference prices should be checked
@@ -235,7 +243,7 @@ mocked in `users.service.spec.ts` (real bcrypt is deliberately slow) with a
 fake hash format (`` `hashed:${plain}` ``) that a fake `compare` can check
 against — swap both if bcrypt's usage ever changes shape.
 
-**`test/` now has real e2e coverage** (34 tests, `auth`/`alarms`/
+**`test/` now has real e2e coverage** (35 tests, `auth`/`alarms`/
 `portfolios`/`notification-channels`): full HTTP requests via `supertest` against a real
 Nest app (`test/helpers/app.ts` mirrors `main.ts`'s setup) and a real
 Postgres — `docker-compose.yml`'s `postgres-test` service, profile-gated

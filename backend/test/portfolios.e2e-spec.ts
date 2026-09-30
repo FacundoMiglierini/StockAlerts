@@ -80,6 +80,7 @@ describe('Portfolios (e2e)', () => {
         strategyType: 'MANUAL_THRESHOLD',
         params: { trigger: 80, target: 96 },
         rung: 1,
+        phase: 'BUY',
       });
       expect(await prisma.alarm.count()).toBe(0);
       expect(await prisma.portfolio.count()).toBe(0);
@@ -175,6 +176,41 @@ describe('Portfolios (e2e)', () => {
         ['AAPL', 'USA', { trigger: 150, target: 210 }],
         ['BTC', 'CRYPTO', { trigger: 50000, target: 90000 }],
       ]);
+    });
+
+    it('imports a ladder of explicit rows per ticker, with SELL rows waiting only for their target', async () => {
+      await post('/portfolios', tokenA, {
+        name: 'Migrated',
+        recipe: 'EXPLICIT_THRESHOLDS',
+        rows: [
+          {
+            ticker: 'HL',
+            market: 'BYMA',
+            trigger: '41380',
+            target: '49656',
+            phase: 'SELL',
+          },
+          {
+            ticker: 'HL',
+            market: 'BYMA',
+            trigger: '26483.2',
+            target: '31779.84',
+            phase: '',
+          },
+        ],
+      }).expect(201);
+
+      const alarms = await prisma.alarm.findMany();
+      const statusByTrigger = Object.fromEntries(
+        alarms.map((a) => [
+          (a.params as { trigger: number }).trigger,
+          [a.status, a.notificationStatus],
+        ]),
+      );
+      expect(statusByTrigger).toEqual({
+        41380: ['ACTIVE', 'NOTIFIED_ONCE'],
+        26483.2: ['ACTIVE', 'NOT_NOTIFIED'],
+      });
     });
 
     it('requires a name (only preview tolerates its absence)', async () => {
