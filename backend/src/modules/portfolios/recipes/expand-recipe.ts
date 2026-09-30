@@ -33,7 +33,8 @@ export interface PlannedAlarm {
   market: Market;
   strategyType: typeof StrategyType.MANUAL_THRESHOLD;
   params: { trigger: number; target: number };
-  // 1-based ladder rung; null for recipes with no notion of one.
+  // 1-based ladder rung. Explicit rows don't carry one, so it's derived
+  // once all rows are known (see numberExplicitRungs); null only until then.
   rung: number | null;
   phase: Phase;
 }
@@ -164,6 +165,24 @@ function planLadder(
   return rungs;
 }
 
+// Explicit rows for one ticker are usually a hand-written ladder (the old
+// CSV's shape), so number them the way a ladder would be: highest trigger
+// first. Preview-only — rungs aren't stored on the alarm.
+function numberExplicitRungs(alarms: PlannedAlarm[]): void {
+  const groups = new Map<string, PlannedAlarm[]>();
+  for (const alarm of alarms) {
+    const key = `${alarm.market}:${alarm.ticker}`;
+    groups.set(key, [...(groups.get(key) ?? []), alarm]);
+  }
+  for (const group of groups.values()) {
+    group
+      .sort((a, b) => b.params.trigger - a.params.trigger)
+      .forEach((alarm, index) => {
+        alarm.rung = index + 1;
+      });
+  }
+}
+
 export function expandRecipe(
   recipe: RecipeType,
   rows: unknown[],
@@ -267,6 +286,10 @@ export function expandRecipe(
     }
     alarms.push(...rowAlarms);
   });
+
+  if (recipe === RecipeType.EXPLICIT_THRESHOLDS) {
+    numberExplicitRungs(alarms);
+  }
 
   if (alarms.length > MAX_ALARMS) {
     errors.push({

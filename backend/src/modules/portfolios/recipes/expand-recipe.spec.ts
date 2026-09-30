@@ -157,7 +157,7 @@ describe('expandRecipe', () => {
           market: 'USA',
           strategyType: 'MANUAL_THRESHOLD',
           params: { trigger: 150.123, target: 210 },
-          rung: null,
+          rung: 1,
           phase: 'BUY',
         },
         {
@@ -165,7 +165,7 @@ describe('expandRecipe', () => {
           market: 'CRYPTO',
           strategyType: 'MANUAL_THRESHOLD',
           params: { trigger: 50000, target: 90000 },
-          rung: null,
+          rung: 1,
           phase: 'BUY',
         },
       ]);
@@ -203,6 +203,27 @@ describe('expandRecipe', () => {
 
       expect(errors).toEqual([]);
       expect(alarms.map((a) => a.phase)).toEqual(['SELL', 'BUY', 'BUY', 'BUY']);
+    });
+
+    it('numbers repeated tickers as a ladder, highest trigger first, keeping row order', () => {
+      const { alarms, errors } = expandRecipe(
+        RecipeType.EXPLICIT_THRESHOLDS,
+        [
+          { ticker: 'MORI', market: 'BYMA', trigger: 19.8, target: 27.72 },
+          { ticker: 'MORI', market: 'BYMA', trigger: 33, target: 46.2 },
+          { ticker: 'MORI', market: 'USA', trigger: 5, target: 6 },
+          { ticker: 'MORI', market: 'BYMA', trigger: 11.88, target: 16.63 },
+        ],
+        undefined,
+      );
+
+      expect(errors).toEqual([]);
+      expect(alarms.map((a) => [a.market, a.params.trigger, a.rung])).toEqual([
+        ['BYMA', 19.8, 2],
+        ['BYMA', 33, 1],
+        ['USA', 5, 1],
+        ['BYMA', 11.88, 3],
+      ]);
     });
 
     it('rejects an unknown phase', () => {
