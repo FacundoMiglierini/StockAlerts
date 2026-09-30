@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Alarm, NotificationStatus } from '../types';
 import {
   STRATEGY_LABELS,
@@ -11,9 +11,12 @@ import {
   EmptyAlarmsIcon,
   ClockIcon,
   CheckCircleIcon,
+  ChevronDownIcon,
   LayersIcon,
 } from './icons';
 import { ConfirmDialog } from './ConfirmDialog';
+import { Pagination } from './Pagination';
+import { usePagination } from '../pagination';
 
 interface Props {
   alarms: Alarm[];
@@ -22,23 +25,98 @@ interface Props {
   onDelete: (id: string) => void;
   // Portfolio id -> name, for tagging alarms that came from an import.
   portfolioNames: Map<string, string>;
+  // Expand every group regardless of what the user toggled — AlarmsPage
+  // sets it while a ticker search is active, so matches are visible at once.
+  forceExpanded: boolean;
+  // Changes whenever the filters do, sending pagination back to page 1.
+  paginationKey: string;
 }
+
+// Paginates tickers, not alarms, so one ticker's ladder never splits
+// across pages.
+const TICKERS_PER_PAGE = 10;
 
 interface ParamStat {
   label: string;
   value: string;
 }
 
+// One ticker on one market: the same ticker string can be a different
+// security on another market (see root CLAUDE.md), so both form the key.
+interface AlarmGroup {
+  key: string;
+  ticker: string;
+  market: Alarm['market'];
+  // Sorted: price thresholds by trigger (highest first, like a ladder),
+  // then every other strategy, newest first.
+  alarms: Alarm[];
+  // Alarm id -> 1-based ladder step, for MANUAL_THRESHOLD alarms only.
+  steps: Map<string, number>;
+  portfolioIds: string[];
+}
+
 function paramStats(alarm: Alarm): ParamStat[] {
   const currency = CURRENCY_SYMBOLS[alarm.market];
   const fields = STRATEGY_FIELDS[alarm.strategyType];
-  return Object.entries(alarm.params).map(([key, value]) => {
-    const label = fields.find((f) => f.name === key)?.label ?? key;
+  // Follow the strategy's field order, not the stored one: Postgres jsonb
+  // reorders keys (shortest first), which would put target before trigger.
+  const rank = (key: string) => {
+    const index = fields.findIndex((f) => f.name === key);
+    return index === -1 ? fields.length : index;
+  };
+  const entries = Object.entries(alarm.params).sort(
+    ([a], [b]) => rank(a) - rank(b),
+  );
+  return entries.map(([key, value]) => {
+    const label =
+      alarm.strategyType === 'MANUAL_THRESHOLD'
+        ? key === 'trigger'
+          ? 'Buy at'
+          : 'Sell at'
+        : (fields.find((f) => f.name === key)?.label ?? key);
     return {
       label,
-      value: PRICE_FIELD_NAMES.has(key) ? `${currency}${value}` : String(value),
+      value: PRICE_FIELD_NAMES.has(key)
+        ? `${currency}${value.toLocaleString(undefined, { maximumFractionDigits: 6 })}`
+        : String(value),
     };
   });
+}
+
+function groupAlarms(alarms: Alarm[]): AlarmGroup[] {
+  const byKey = new Map<string, Alarm[]>();
+  for (const alarm of alarms) {
+    const key = `${alarm.market}:${alarm.ticker}`;
+    byKey.set(key, [...(byKey.get(key) ?? []), alarm]);
+  }
+
+  return [...byKey.entries()]
+    .map(([key, members]) => {
+      const thresholds = members
+        .filter((a) => a.strategyType === 'MANUAL_THRESHOLD')
+        .sort((a, b) => b.params.trigger - a.params.trigger);
+      const others = members
+        .filter((a) => a.strategyType !== 'MANUAL_THRESHOLD')
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      return {
+        key,
+        ticker: members[0].ticker,
+        market: members[0].market,
+        alarms: [...thresholds, ...others],
+        steps: new Map(thresholds.map((a, index) => [a.id, index + 1])),
+        portfolioIds: [
+          ...new Set(
+            members.flatMap((a) => (a.portfolioId ? [a.portfolioId] : [])),
+          ),
+        ],
+      };
+    })
+    .sort(
+      (a, b) =>
+        // numeric: X2 before X10.
+        a.ticker.localeCompare(b.ticker, undefined, { numeric: true }) ||
+        a.market.localeCompare(b.market),
+    );
 }
 
 function formatTriggeredAt(triggeredAt: string): string {
@@ -55,13 +133,26 @@ const NOTIFICATION_LABELS: Record<NotificationStatus, string> = {
   NOTIFIED_TWICE: 'Notified twice',
 };
 
-function NotificationStatusTag({ status }: { status: NotificationStatus }) {
+// MANUAL_THRESHOLD's two phases (see worker/strategies/manual_threshold.py):
+// NOT_NOTIFIED watches the trigger, NOTIFIED_ONCE watches the target.
+const PHASE_LABELS: Record<NotificationStatus, string> = {
+  NOT_NOTIFIED: 'Waiting to buy',
+  NOTIFIED_ONCE: 'Waiting to sell',
+  NOTIFIED_TWICE: 'Sold',
+};
+
+function NotificationStatusTag({ alarm }: { alarm: Alarm }) {
+  const status = alarm.notificationStatus;
+  const labels =
+    alarm.strategyType === 'MANUAL_THRESHOLD'
+      ? PHASE_LABELS
+      : NOTIFICATION_LABELS;
   return (
     <span
       className={`notification-status ${status !== 'NOT_NOTIFIED' ? 'is-notified' : ''}`}
     >
       {status === 'NOT_NOTIFIED' ? <ClockIcon /> : <CheckCircleIcon />}
-      {NOTIFICATION_LABELS[status]}
+      {labels[status]}
     </span>
   );
 }
@@ -75,14 +166,44 @@ function StatusBadge({ status }: { status: Alarm['status'] }) {
   );
 }
 
+function plural(count: number, word: string): string {
+  return `${count} ${word}${count === 1 ? '' : 's'}`;
+}
+
+function groupSummary(group: AlarmGroup): string {
+  const count = (predicate: (a: Alarm) => boolean) =>
+    group.alarms.filter(predicate).length;
+  const selling = count(
+    (a) =>
+      a.strategyType === 'MANUAL_THRESHOLD' &&
+      a.status === 'ACTIVE' &&
+      a.notificationStatus === 'NOTIFIED_ONCE',
+  );
+  const triggered = count((a) => a.status === 'TRIGGERED');
+  const disabled = count((a) => a.status === 'DISABLED');
+  return [
+    plural(group.alarms.length, 'alarm'),
+    selling > 0 && `${selling} waiting to sell`,
+    triggered > 0 && `${triggered} triggered`,
+    disabled > 0 && `${disabled} disabled`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
+
 export function AlarmList({
   alarms,
   onSetStatus,
   onEdit,
   onDelete,
   portfolioNames,
+  forceExpanded,
+  paginationKey,
 }: Props) {
   const [pendingDelete, setPendingDelete] = useState<Alarm | null>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const groups = useMemo(() => groupAlarms(alarms), [alarms]);
+  const pagination = usePagination(groups, TICKERS_PER_PAGE, paginationKey);
 
   if (alarms.length === 0) {
     return (
@@ -96,85 +217,141 @@ export function AlarmList({
     );
   }
 
+  const isOpen = (key: string) => forceExpanded || expanded.has(key);
+
+  function toggle(key: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
   return (
     <>
-      <ul className="alarm-list">
-        {alarms.map((alarm) => (
-          <li
-            key={alarm.id}
-            className={`card alarm-row ${alarm.status === 'TRIGGERED' ? 'is-triggered' : ''} ${
-              alarm.status === 'DISABLED' ? 'is-disabled' : ''
-            }`}
-          >
-            <div className="alarm-identity">
-              <div className="alarm-identity-main">
-                <strong className="ticker">{alarm.ticker}</strong>
-                <span className="tag">{MARKET_LABELS[alarm.market]}</span>
-                {alarm.portfolioId && portfolioNames.has(alarm.portfolioId) && (
+      <div className="alarm-groups-toolbar">
+        <span className="text-muted">{plural(groups.length, 'ticker')}</span>
+        {!forceExpanded && (
+          <div className="alarm-groups-toggle">
+            <button
+              type="button"
+              onClick={() => setExpanded(new Set(groups.map((g) => g.key)))}
+            >
+              Expand all
+            </button>
+            <button type="button" onClick={() => setExpanded(new Set())}>
+              Collapse all
+            </button>
+          </div>
+        )}
+      </div>
+      <ul className="alarm-groups">
+        {pagination.pageItems.map((group) => (
+          <li key={group.key} className="card alarm-group">
+            <button
+              type="button"
+              className={`alarm-group-header ${isOpen(group.key) ? 'is-open' : ''}`}
+              onClick={() => toggle(group.key)}
+              aria-expanded={isOpen(group.key)}
+              disabled={forceExpanded}
+            >
+              <span className="alarm-group-chevron">
+                <ChevronDownIcon />
+              </span>
+              <strong className="ticker">{group.ticker}</strong>
+              <span className="tag">{MARKET_LABELS[group.market]}</span>
+              {group.portfolioIds
+                .filter((id) => portfolioNames.has(id))
+                .map((id) => (
                   <span
+                    key={id}
                     className="tag portfolio-tag"
-                    title={`From portfolio "${portfolioNames.get(alarm.portfolioId)}"`}
+                    title={`From portfolio "${portfolioNames.get(id)}"`}
                   >
                     <LayersIcon size={11} />
-                    <span>{portfolioNames.get(alarm.portfolioId)}</span>
+                    <span>{portfolioNames.get(id)}</span>
                   </span>
-                )}
-              </div>
-              <span className="alarm-strategy-label">
-                {STRATEGY_LABELS[alarm.strategyType]}
-              </span>
-            </div>
-            <div className="alarm-status-col">
-              <StatusBadge status={alarm.status} />
-              {alarm.status === 'TRIGGERED' && alarm.triggeredAt && (
-                <span className="alarm-triggered-at">
-                  Triggered on {formatTriggeredAt(alarm.triggeredAt)}
-                </span>
-              )}
-            </div>
-            <div className="alarm-param-grid">
-              {paramStats(alarm).map((stat) => (
-                <div key={stat.label} className="alarm-param-stat">
-                  <div className="alarm-param-label">{stat.label}</div>
-                  <div className="alarm-param-value mono">{stat.value}</div>
-                </div>
-              ))}
-            </div>
-            <div className="alarm-footer">
-              <NotificationStatusTag status={alarm.notificationStatus} />
-              <div className="alarm-actions">
-                {alarm.status !== 'ACTIVE' && (
-                  <button
-                    type="button"
-                    onClick={() => onSetStatus(alarm.id, 'ACTIVE')}
+                ))}
+              <span className="alarm-group-summary">{groupSummary(group)}</span>
+            </button>
+            {isOpen(group.key) && (
+              <ul className="alarm-group-rows">
+                {group.alarms.map((alarm) => (
+                  <li
+                    key={alarm.id}
+                    className={`alarm-line ${alarm.status === 'TRIGGERED' ? 'is-triggered' : ''} ${
+                      alarm.status === 'DISABLED' ? 'is-disabled' : ''
+                    }`}
                   >
-                    {alarm.status === 'TRIGGERED' ? 'Re-arm' : 'Enable'}
-                  </button>
-                )}
-                {alarm.status === 'ACTIVE' && (
-                  <button
-                    type="button"
-                    onClick={() => onSetStatus(alarm.id, 'DISABLED')}
-                  >
-                    Disable
-                  </button>
-                )}
-                <button type="button" onClick={() => onEdit(alarm)}>
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  className="danger"
-                  onClick={() => setPendingDelete(alarm)}
-                >
-                  <TrashIcon size={13} />
-                  Delete
-                </button>
-              </div>
-            </div>
+                    <span className="alarm-line-step mono">
+                      {group.steps.has(alarm.id)
+                        ? `#${group.steps.get(alarm.id)}`
+                        : ''}
+                    </span>
+                    <div className="alarm-line-params">
+                      {alarm.strategyType !== 'MANUAL_THRESHOLD' && (
+                        <span className="alarm-strategy-label">
+                          {STRATEGY_LABELS[alarm.strategyType]}
+                        </span>
+                      )}
+                      {paramStats(alarm).map((stat) => (
+                        <span key={stat.label} className="alarm-line-stat">
+                          <span className="alarm-param-label">
+                            {stat.label}
+                          </span>
+                          <span className="alarm-param-value mono">
+                            {stat.value}
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="alarm-line-state">
+                      <StatusBadge status={alarm.status} />
+                      <NotificationStatusTag alarm={alarm} />
+                      {alarm.status === 'TRIGGERED' && alarm.triggeredAt && (
+                        <span className="alarm-triggered-at">
+                          {formatTriggeredAt(alarm.triggeredAt)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="alarm-actions">
+                      {alarm.status !== 'ACTIVE' && (
+                        <button
+                          type="button"
+                          onClick={() => onSetStatus(alarm.id, 'ACTIVE')}
+                        >
+                          {alarm.status === 'TRIGGERED' ? 'Re-arm' : 'Enable'}
+                        </button>
+                      )}
+                      {alarm.status === 'ACTIVE' && (
+                        <button
+                          type="button"
+                          onClick={() => onSetStatus(alarm.id, 'DISABLED')}
+                        >
+                          Disable
+                        </button>
+                      )}
+                      <button type="button" onClick={() => onEdit(alarm)}>
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="danger"
+                        onClick={() => setPendingDelete(alarm)}
+                        aria-label={`Delete ${alarm.ticker} alarm`}
+                      >
+                        <TrashIcon size={13} />
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>
+      <Pagination state={pagination} itemLabel="tickers" />
       {pendingDelete && (
         <ConfirmDialog
           title="Delete alarm"

@@ -12,6 +12,8 @@ export interface AlarmFilters {
   status: AlarmStatus | 'ALL';
   dateRange: DateRangeFilter;
   portfolio: PortfolioFilter;
+  // Case-insensitive substring of the ticker; '' = no search.
+  search: string;
 }
 
 export const DEFAULT_FILTERS: AlarmFilters = {
@@ -19,6 +21,7 @@ export const DEFAULT_FILTERS: AlarmFilters = {
   status: 'ALL',
   dateRange: 'ALL',
   portfolio: 'ALL',
+  search: '',
 };
 
 const STATUS_LABELS: Record<AlarmStatus, string> = {
@@ -42,7 +45,9 @@ export function applyAlarmFilters(
     filters.dateRange === 'ALL'
       ? null
       : Date.now() - Number(filters.dateRange) * 24 * 60 * 60 * 1000;
+  const search = filters.search.trim().toUpperCase();
   return alarms.filter((alarm) => {
+    if (search && !alarm.ticker.includes(search)) return false;
     if (filters.market !== 'ALL' && alarm.market !== filters.market)
       return false;
     if (filters.status !== 'ALL' && alarm.status !== filters.status)
@@ -69,7 +74,8 @@ export function FiltersBar({ filters, onChange, portfolios }: Props) {
     filters.market !== 'ALL' ||
     filters.status !== 'ALL' ||
     filters.dateRange !== 'ALL' ||
-    filters.portfolio !== 'ALL';
+    filters.portfolio !== 'ALL' ||
+    filters.search.trim() !== '';
 
   return (
     <div className="filters-bar">
@@ -78,6 +84,16 @@ export function FiltersBar({ filters, onChange, portfolios }: Props) {
         Filters
       </span>
       <div className="filters-divider" />
+      <input
+        type="search"
+        className={
+          filters.search.trim() ? 'filter-search is-active' : 'filter-search'
+        }
+        placeholder="Search ticker"
+        value={filters.search}
+        onChange={(e) => onChange({ ...filters, search: e.target.value })}
+        aria-label="Search by ticker"
+      />
       <select
         className={
           filters.market !== 'ALL' ? 'filter-select is-active' : 'filter-select'
