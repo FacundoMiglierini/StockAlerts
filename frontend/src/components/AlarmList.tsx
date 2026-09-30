@@ -53,7 +53,42 @@ interface AlarmGroup {
   // Alarm id -> 1-based ladder step, for MANUAL_THRESHOLD alarms only.
   steps: Map<string, number>;
   portfolioIds: string[];
+  // Counts for the header summary and the "Needs attention" sort.
+  selling: number;
+  triggered: number;
+  disabled: number;
+  // createdAt of the group's newest alarm (ISO strings sort as dates).
+  newest: string;
 }
+
+type GroupSort = 'TICKER' | 'ATTENTION' | 'NEWEST' | 'MOST_ALARMS';
+
+const SORT_LABELS: Record<GroupSort, string> = {
+  TICKER: 'Ticker A–Z',
+  ATTENTION: 'Needs attention',
+  NEWEST: 'Recently created',
+  MOST_ALARMS: 'Most alarms',
+};
+
+// numeric: X2 before X10.
+const byTicker = (a: AlarmGroup, b: AlarmGroup) =>
+  a.ticker.localeCompare(b.ticker, undefined, { numeric: true }) ||
+  a.market.localeCompare(b.market);
+
+// Whole groups are sorted, never alarms across groups, so a ladder stays
+// together. Ticker order breaks every tie, keeping the order stable.
+const GROUP_COMPARATORS: Record<
+  GroupSort,
+  (a: AlarmGroup, b: AlarmGroup) => number
+> = {
+  TICKER: byTicker,
+  // Triggered alarms and open positions (waiting to sell) are what the
+  // user has to act on or watch.
+  ATTENTION: (a, b) =>
+    b.triggered + b.selling - (a.triggered + a.selling) || byTicker(a, b),
+  NEWEST: (a, b) => b.newest.localeCompare(a.newest) || byTicker(a, b),
+  MOST_ALARMS: (a, b) => b.alarms.length - a.alarms.length || byTicker(a, b),
+};
 
 function paramStats(alarm: Alarm): ParamStat[] {
   const currency = CURRENCY_SYMBOLS[alarm.market];
@@ -90,33 +125,38 @@ function groupAlarms(alarms: Alarm[]): AlarmGroup[] {
     byKey.set(key, [...(byKey.get(key) ?? []), alarm]);
   }
 
-  return [...byKey.entries()]
-    .map(([key, members]) => {
-      const thresholds = members
-        .filter((a) => a.strategyType === 'MANUAL_THRESHOLD')
-        .sort((a, b) => b.params.trigger - a.params.trigger);
-      const others = members
-        .filter((a) => a.strategyType !== 'MANUAL_THRESHOLD')
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-      return {
-        key,
-        ticker: members[0].ticker,
-        market: members[0].market,
-        alarms: [...thresholds, ...others],
-        steps: new Map(thresholds.map((a, index) => [a.id, index + 1])),
-        portfolioIds: [
-          ...new Set(
-            members.flatMap((a) => (a.portfolioId ? [a.portfolioId] : [])),
-          ),
-        ],
-      };
-    })
-    .sort(
-      (a, b) =>
-        // numeric: X2 before X10.
-        a.ticker.localeCompare(b.ticker, undefined, { numeric: true }) ||
-        a.market.localeCompare(b.market),
-    );
+  return [...byKey.entries()].map(([key, members]) => {
+    const thresholds = members
+      .filter((a) => a.strategyType === 'MANUAL_THRESHOLD')
+      .sort((a, b) => b.params.trigger - a.params.trigger);
+    const others = members
+      .filter((a) => a.strategyType !== 'MANUAL_THRESHOLD')
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return {
+      key,
+      ticker: members[0].ticker,
+      market: members[0].market,
+      alarms: [...thresholds, ...others],
+      steps: new Map(thresholds.map((a, index) => [a.id, index + 1])),
+      portfolioIds: [
+        ...new Set(
+          members.flatMap((a) => (a.portfolioId ? [a.portfolioId] : [])),
+        ),
+      ],
+      selling: members.filter(
+        (a) =>
+          a.strategyType === 'MANUAL_THRESHOLD' &&
+          a.status === 'ACTIVE' &&
+          a.notificationStatus === 'NOTIFIED_ONCE',
+      ).length,
+      triggered: members.filter((a) => a.status === 'TRIGGERED').length,
+      disabled: members.filter((a) => a.status === 'DISABLED').length,
+      newest: members.reduce(
+        (max, a) => (a.createdAt > max ? a.createdAt : max),
+        '',
+      ),
+    };
+  });
 }
 
 function formatTriggeredAt(triggeredAt: string): string {
@@ -170,19 +210,14 @@ function plural(count: number, word: string): string {
   return `${count} ${word}${count === 1 ? '' : 's'}`;
 }
 
-function groupSummary(group: AlarmGroup): string {
-  const count = (predicate: (a: Alarm) => boolean) =>
-    group.alarms.filter(predicate).length;
-  const selling = count(
-    (a) =>
-      a.strategyType === 'MANUAL_THRESHOLD' &&
-      a.status === 'ACTIVE' &&
-      a.notificationStatus === 'NOTIFIED_ONCE',
-  );
-  const triggered = count((a) => a.status === 'TRIGGERED');
-  const disabled = count((a) => a.status === 'DISABLED');
+function groupSummary({
+  alarms,
+  selling,
+  triggered,
+  disabled,
+}: AlarmGroup): string {
   return [
-    plural(group.alarms.length, 'alarm'),
+    plural(alarms.length, 'alarm'),
     selling > 0 && `${selling} waiting to sell`,
     triggered > 0 && `${triggered} triggered`,
     disabled > 0 && `${disabled} disabled`,
@@ -202,8 +237,16 @@ export function AlarmList({
 }: Props) {
   const [pendingDelete, setPendingDelete] = useState<Alarm | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const groups = useMemo(() => groupAlarms(alarms), [alarms]);
-  const pagination = usePagination(groups, TICKERS_PER_PAGE, paginationKey);
+  const [sort, setSort] = useState<GroupSort>('TICKER');
+  const groups = useMemo(
+    () => groupAlarms(alarms).sort(GROUP_COMPARATORS[sort]),
+    [alarms, sort],
+  );
+  const pagination = usePagination(
+    groups,
+    TICKERS_PER_PAGE,
+    `${paginationKey}|${sort}`,
+  );
 
   if (alarms.length === 0) {
     return (
@@ -232,6 +275,20 @@ export function AlarmList({
     <>
       <div className="alarm-groups-toolbar">
         <span className="text-muted">{plural(groups.length, 'ticker')}</span>
+        <select
+          className={
+            sort !== 'TICKER' ? 'filter-select is-active' : 'filter-select'
+          }
+          value={sort}
+          onChange={(e) => setSort(e.target.value as GroupSort)}
+          aria-label="Sort tickers"
+        >
+          {Object.entries(SORT_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>
+              Sort: {label}
+            </option>
+          ))}
+        </select>
         {!forceExpanded && (
           <div className="alarm-groups-toggle">
             <button
