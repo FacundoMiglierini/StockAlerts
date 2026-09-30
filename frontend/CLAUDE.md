@@ -39,6 +39,11 @@ src/
                             per-strategy cross-field checks (mirrors the
                             backend Zod schema's .refine() where one exists;
                             the rest are UX-only, not backend-enforced)
+  csv.ts                    minimal CSV reader for the portfolio import: quoted
+                            fields, `,`/`;`/tab delimiters (auto-detected),
+                            BOM/CRLF, and the old script's `symbol` header read
+                            as `ticker`. Every cell stays a string — the backend
+                            is the single validator of values
   tickers.ts               static curated ticker shortlists per market for
                             the autocomplete dropdown — convenience only, not
                             validation (see file header for why static).
@@ -64,6 +69,15 @@ src/
     FiltersBar.tsx           client-side market/status/date-range filtering
                               for AlarmsPage — no backend query params, the
                               full list is already fetched
+    PortfolioImportForm.tsx  the import flow inside PortfoliosPage's wide Modal:
+                              recipe + name (+ ladder options as % strings),
+                              CSV pasted or loaded from a file -> "Preview
+                              alarms" (POST /portfolios/preview: per-row errors
+                              plus the alarms that would be created) -> "Create
+                              N alarms" (POST /portfolios). Any edit clears the
+                              preview, so Create can only submit exactly what
+                              was previewed; it's only offered when there are
+                              zero errors
     TickerInput.tsx          ticker field with a searchable autocomplete
                               dropdown (tickers.ts); still free text
     Modal.tsx                generic centered modal (Escape/backdrop close)
@@ -100,6 +114,14 @@ src/
                               FiltersBar above AlarmList when there's at
                               least one alarm
     CreateAlarmPage.tsx      mobile-only full-page alarm creation
+    PortfoliosPage.tsx       /portfolios ("Portfolios" nav tab): list of
+                              imported portfolios (name, alarm count, created)
+                              with "Import portfolio" -> PortfolioImportForm.
+                              Delete goes through ConfirmDialog and states the
+                              alarm count, since it cascades to the portfolio's
+                              alarms, triggered ones included. Alarms created
+                              here also show up on AlarmsPage — there's no
+                              per-portfolio filter there yet
     SettingsPage.tsx         Appearance (theme picker, via ThemeContext) +
                               Telegram chat id linking (PATCH /users/me)
     AdminPage.tsx            admin-only user roster (GET /users): a <table>
@@ -128,6 +150,14 @@ than shared/generated because the two are in different languages/runtimes
 adding a strategy type, update both, plus the worker's registry (see
 `worker/CLAUDE.md`) — three places, by design (see root `CLAUDE.md`'s
 strategy registry note).
+
+## Testing gap: no frontend test runner
+
+There's no Vitest/Jest here (adding one is a dependency decision nobody has
+made yet), so `csv.ts` — the one piece of real logic in the frontend — has no
+committed test. It was verified once with a throwaway script run through the
+backend's `tsx` (quoting, delimiters, CRLF/BOM, short/long rows, an
+unterminated quote). If it changes, re-verify the same way or add a runner.
 
 ## Running locally
 

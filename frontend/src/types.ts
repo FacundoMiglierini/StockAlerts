@@ -37,6 +37,8 @@ export interface Alarm {
   params: Record<string, number>;
   status: AlarmStatus;
   notificationStatus: NotificationStatus;
+  // Set only for alarms created by a portfolio import.
+  portfolioId: string | null;
   triggeredAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -59,4 +61,35 @@ export interface AdminUserSummary {
   // or delete it; see backend/src/modules/users/users.service.ts.
   isDefaultAdmin: boolean;
   alarmCount: number;
+}
+
+// Mirrors backend/src/modules/portfolios — keep in sync.
+export interface Portfolio {
+  id: string;
+  name: string;
+  createdAt: string;
+  alarmCount: number;
+}
+
+export type RecipeType = 'EXPLICIT_THRESHOLDS' | 'DRAWDOWN_LADDER';
+
+export interface PlannedAlarm {
+  ticker: string;
+  market: Market;
+  strategyType: 'MANUAL_THRESHOLD';
+  params: { trigger: number; target: number };
+  // 1-based ladder rung; null for recipes with no notion of one.
+  rung: number | null;
+}
+
+// `row` is the 1-based index among the submitted data rows (header not
+// counted); null for an error about the import as a whole.
+export interface PortfolioRowError {
+  row: number | null;
+  message: string;
+}
+
+export interface PortfolioPlan {
+  alarms: PlannedAlarm[];
+  errors: PortfolioRowError[];
 }

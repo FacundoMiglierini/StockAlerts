@@ -7,6 +7,7 @@ import {
   MenuIcon,
   BellIcon,
   GearIcon,
+  LayersIcon,
   ShieldIcon,
 } from './icons';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -49,6 +50,10 @@ export function Layout() {
           <NavLink to="/alarms" onClick={() => setNavOpen(false)}>
             <BellIcon />
             Alarms
+          </NavLink>
+          <NavLink to="/portfolios" onClick={() => setNavOpen(false)}>
+            <LayersIcon />
+            Portfolios
           </NavLink>
           <NavLink to="/settings" onClick={() => setNavOpen(false)}>
             <GearIcon />
