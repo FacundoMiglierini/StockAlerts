@@ -137,6 +137,14 @@ has been run against the Mini PC yet; local dev has only ever exercised
    policy: `"nodeAttrs": [{"target": ["autogroup:member"], "attr":
    ["funnel"]}]`.
 
+**Redeploying after new commits**: `scripts/deploy.sh` on the Mini PC
+(`--help` for flags; `--dry-run` prints the commands). It pulls, takes a
+`pg_dump` backup to `~/stockalerts-backups`, rebuilds postgres/backend and
+waits for `GET /health`, force-recreates `tailscale` if it exists (it
+shares backend's network namespace, so recreating backend alone silently
+breaks Funnel), and rebuilds — never starts — the worker image for cron.
+The frontend redeploys itself on Netlify from the push.
+
 Postgres and the worker are never exposed — only `backend`'s port needs a
 public URL, and CORS is already wide-open (`app.enableCors()` in
 `backend/src/main.ts`), so no backend code change is needed for the
