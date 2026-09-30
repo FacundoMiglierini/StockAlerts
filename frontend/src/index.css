@@ -1383,6 +1383,26 @@ textarea::placeholder {
   border-color: var(--accent);
 }
 
+.sort-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sort-direction {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.sort-direction.is-active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .filter-select.is-active {
   background-color: var(--accent-soft);
   border-color: var(--accent);

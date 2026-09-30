@@ -8,31 +8,37 @@ import { Modal } from '../components/Modal';
 import { Pagination } from '../components/Pagination';
 import { PortfolioImportForm } from '../components/PortfolioImportForm';
 import { usePagination } from '../pagination';
+import { SortControl } from '../components/SortControl';
+import { sortItems, type SortField, type SortState } from '../sorting';
 import { useToast } from '../components/Toast';
 
 const PORTFOLIOS_PER_PAGE = 10;
 
-type PortfolioSort = 'NEWEST' | 'OLDEST' | 'NAME' | 'MOST_ALARMS';
-
-const SORT_LABELS: Record<PortfolioSort, string> = {
-  NEWEST: 'Newest',
-  OLDEST: 'Oldest',
-  NAME: 'Name A–Z',
-  MOST_ALARMS: 'Most alarms',
-};
+type PortfolioSortField = 'CREATED' | 'NAME' | 'ALARMS';
 
 // numeric: "Extra 2" before "Extra 10".
 const byName = (a: Portfolio, b: Portfolio) =>
   a.name.localeCompare(b.name, undefined, { numeric: true });
 
-const COMPARATORS: Record<
-  PortfolioSort,
-  (a: Portfolio, b: Portfolio) => number
-> = {
-  NEWEST: (a, b) => b.createdAt.localeCompare(a.createdAt) || byName(a, b),
-  OLDEST: (a, b) => a.createdAt.localeCompare(b.createdAt) || byName(a, b),
-  NAME: byName,
-  MOST_ALARMS: (a, b) => b.alarmCount - a.alarmCount || byName(a, b),
+const SORT_FIELDS: Record<PortfolioSortField, SortField<Portfolio>> = {
+  CREATED: {
+    label: 'Created',
+    kind: 'date',
+    defaultDir: 'desc',
+    compare: (a, b) => a.createdAt.localeCompare(b.createdAt),
+  },
+  NAME: { label: 'Name', kind: 'text', defaultDir: 'asc', compare: byName },
+  ALARMS: {
+    label: 'Alarm count',
+    kind: 'number',
+    defaultDir: 'desc',
+    compare: (a, b) => a.alarmCount - b.alarmCount,
+  },
+};
+
+const INITIAL_SORT: SortState<PortfolioSortField> = {
+  field: 'CREATED',
+  dir: 'desc',
 };
 
 export function PortfoliosPage() {
@@ -44,17 +50,20 @@ export function PortfoliosPage() {
   const { showSuccess, showError } = useToast();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const [sort, setSort] = useState<PortfolioSort>('NEWEST');
+  const [sort, setSort] = useState(INITIAL_SORT);
   const visible = useMemo(() => {
     const needle = search.trim().toLowerCase();
-    return portfolios
-      .filter((p) => p.name.toLowerCase().includes(needle))
-      .sort(COMPARATORS[sort]);
+    return sortItems(
+      portfolios.filter((p) => p.name.toLowerCase().includes(needle)),
+      SORT_FIELDS,
+      sort,
+      byName,
+    );
   }, [portfolios, search, sort]);
   const pagination = usePagination(
     visible,
     PORTFOLIOS_PER_PAGE,
-    `${search.trim()}|${sort}`,
+    `${search.trim()}|${sort.field}|${sort.dir}`,
   );
 
   async function loadPortfolios() {
@@ -147,20 +156,13 @@ export function PortfoliosPage() {
               onChange={(e) => setSearch(e.target.value)}
               aria-label="Search portfolios by name"
             />
-            <select
-              className={
-                sort !== 'NEWEST' ? 'filter-select is-active' : 'filter-select'
-              }
+            <SortControl
+              fields={SORT_FIELDS}
               value={sort}
-              onChange={(e) => setSort(e.target.value as PortfolioSort)}
-              aria-label="Sort portfolios"
-            >
-              {Object.entries(SORT_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  Sort: {label}
-                </option>
-              ))}
-            </select>
+              initial={INITIAL_SORT}
+              onChange={setSort}
+              itemLabel="portfolios"
+            />
           </div>
         )}
 
