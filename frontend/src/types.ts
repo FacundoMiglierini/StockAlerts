@@ -80,6 +80,8 @@ export interface PlannedAlarm {
   params: { trigger: number; target: number };
   // 1-based ladder rung; null for recipes with no notion of one.
   rung: number | null;
+  // SELL = position already bought; the alarm only watches for `target`.
+  phase: 'BUY' | 'SELL';
 }
 
 // `row` is the 1-based index among the submitted data rows (header not

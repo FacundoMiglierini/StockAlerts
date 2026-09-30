@@ -7,7 +7,12 @@ import {
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { CreatePortfolioDto } from './dto/create-portfolio.dto.js';
 import { PortfolioImportDto } from './dto/preview-portfolio.dto.js';
-import { expandRecipe, type PlanResult } from './recipes/expand-recipe.js';
+import {
+  Phase,
+  expandRecipe,
+  type PlanResult,
+} from './recipes/expand-recipe.js';
+import { NotificationStatus } from '../../generated/prisma/enums.js';
 
 const UNIQUE_VIOLATION = 'P2002';
 
@@ -43,14 +48,20 @@ export class PortfoliosService {
           data: { userId, name },
         });
         await tx.alarm.createMany({
-          data: alarms.map(({ ticker, market, strategyType, params }) => ({
-            userId,
-            portfolioId: portfolio.id,
-            ticker,
-            market,
-            strategyType,
-            params,
-          })),
+          data: alarms.map(
+            ({ ticker, market, strategyType, params, phase }) => ({
+              userId,
+              portfolioId: portfolio.id,
+              ticker,
+              market,
+              strategyType,
+              params,
+              // Already bought: skip the BUY leg (see Phase).
+              ...(phase === Phase.SELL && {
+                notificationStatus: NotificationStatus.NOTIFIED_ONCE,
+              }),
+            }),
+          ),
         });
         return { ...portfolio, alarmCount: alarms.length };
       });

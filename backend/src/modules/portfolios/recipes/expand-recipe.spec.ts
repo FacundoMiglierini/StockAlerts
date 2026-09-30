@@ -19,6 +19,7 @@ describe('expandRecipe', () => {
           strategyType: 'MANUAL_THRESHOLD',
           params: { trigger: 80, target: 96 },
           rung: 1,
+          phase: 'BUY',
         },
         {
           ticker: 'AAPL',
@@ -26,6 +27,7 @@ describe('expandRecipe', () => {
           strategyType: 'MANUAL_THRESHOLD',
           params: { trigger: 64, target: 76.8 },
           rung: 2,
+          phase: 'BUY',
         },
         {
           ticker: 'AAPL',
@@ -33,6 +35,7 @@ describe('expandRecipe', () => {
           strategyType: 'MANUAL_THRESHOLD',
           params: { trigger: 51.2, target: 61.44 },
           rung: 3,
+          phase: 'BUY',
         },
       ]);
     });
@@ -119,6 +122,23 @@ describe('expandRecipe', () => {
     });
   });
 
+  describe('DRAWDOWN_LADDER duplicates', () => {
+    it('rejects a second row for the same ticker+market, since each row already expands to every rung', () => {
+      const { errors } = expandRecipe(
+        RecipeType.DRAWDOWN_LADDER,
+        [
+          { ticker: 'AAPL', market: 'USA', reference: 100 },
+          { ticker: 'AAPL', market: 'USA', reference: 120 },
+        ],
+        LADDER,
+      );
+
+      expect(errors).toEqual([
+        { row: 2, message: 'duplicate of row 1 (AAPL on USA)' },
+      ]);
+    });
+  });
+
   describe('EXPLICIT_THRESHOLDS', () => {
     it('maps each row 1:1 to a MANUAL_THRESHOLD alarm, values untouched', () => {
       const { alarms, errors } = expandRecipe(
@@ -138,6 +158,7 @@ describe('expandRecipe', () => {
           strategyType: 'MANUAL_THRESHOLD',
           params: { trigger: 150.123, target: 210 },
           rung: null,
+          phase: 'BUY',
         },
         {
           ticker: 'BTC',
@@ -145,6 +166,97 @@ describe('expandRecipe', () => {
           strategyType: 'MANUAL_THRESHOLD',
           params: { trigger: 50000, target: 90000 },
           rung: null,
+          phase: 'BUY',
+        },
+      ]);
+    });
+
+    it('reads an optional phase column: SELL for bought positions, blank or missing means BUY', () => {
+      const { alarms, errors } = expandRecipe(
+        RecipeType.EXPLICIT_THRESHOLDS,
+        [
+          {
+            ticker: 'HL',
+            market: 'BYMA',
+            trigger: 41380,
+            target: 49656,
+            phase: ' sell ',
+          },
+          {
+            ticker: 'HL',
+            market: 'BYMA',
+            trigger: 33104,
+            target: 39724.8,
+            phase: 'BUY',
+          },
+          {
+            ticker: 'XLF',
+            market: 'BYMA',
+            trigger: 29920,
+            target: 34408,
+            phase: '',
+          },
+          { ticker: 'AMD', market: 'BYMA', trigger: 25804.8, target: 30965.76 },
+        ],
+        undefined,
+      );
+
+      expect(errors).toEqual([]);
+      expect(alarms.map((a) => a.phase)).toEqual(['SELL', 'BUY', 'BUY', 'BUY']);
+    });
+
+    it('rejects an unknown phase', () => {
+      const { alarms, errors } = expandRecipe(
+        RecipeType.EXPLICIT_THRESHOLDS,
+        [
+          {
+            ticker: 'HL',
+            market: 'BYMA',
+            trigger: 1,
+            target: 2,
+            phase: 'HOLD',
+          },
+        ],
+        undefined,
+      );
+
+      expect(alarms).toEqual([]);
+      expect(errors).toEqual([
+        { row: 1, message: 'phase: must be BUY or SELL' },
+      ]);
+    });
+
+    it('allows several rows for one ticker (a ladder, one row per rung) as long as thresholds differ', () => {
+      const { alarms, errors } = expandRecipe(
+        RecipeType.EXPLICIT_THRESHOLDS,
+        [
+          {
+            ticker: 'BTC',
+            market: 'CRYPTO',
+            trigger: 47937.19,
+            target: 57524.63,
+          },
+          {
+            ticker: 'BTC',
+            market: 'CRYPTO',
+            trigger: 38349.75,
+            target: 46019.7,
+          },
+          {
+            ticker: 'btc',
+            market: 'crypto',
+            trigger: '47937.19',
+            target: 57524.63,
+          },
+        ],
+        undefined,
+      );
+
+      expect(alarms).toHaveLength(2);
+      expect(errors).toEqual([
+        {
+          row: 3,
+          message: 'duplicate of row 1 (BTC on CRYPTO at 47937.19/57524.63)',
         },
       ]);
     });
@@ -214,7 +326,7 @@ describe('expandRecipe', () => {
       expect(errors.map((e) => e.row)).toEqual([1, 2, 3]);
     });
 
-    it('rejects duplicate ticker+market rows but allows the same ticker on another market', () => {
+    it('rejects identical rows but allows the same ticker on another market', () => {
       const { alarms, errors } = explicit([
         { ticker: 'AAPL', market: 'USA', ...ok },
         { ticker: 'aapl', market: 'usa', ...ok },
@@ -222,7 +334,7 @@ describe('expandRecipe', () => {
       ]);
 
       expect(errors).toEqual([
-        { row: 2, message: 'duplicate of row 1 (AAPL on USA)' },
+        { row: 2, message: 'duplicate of row 1 (AAPL on USA at 1/2)' },
       ]);
       expect(alarms.map((a) => `${a.ticker}:${a.market}`)).toEqual([
         'AAPL:USA',

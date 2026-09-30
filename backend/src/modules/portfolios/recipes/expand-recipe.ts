@@ -21,6 +21,13 @@ export const MAX_ROWS = 500;
 export const MAX_ENTRIES = 10;
 export const MAX_ALARMS = 500;
 
+// Which leg of the two-phase MANUAL_THRESHOLD cycle an alarm starts in.
+// SELL is for a position already bought (the old CSV's status=1 with the
+// BUY already notified): the alarm starts past its BUY notification, so the
+// worker only watches for `target` instead of waiting for a new dip.
+export const Phase = { BUY: 'BUY', SELL: 'SELL' } as const;
+export type Phase = (typeof Phase)[keyof typeof Phase];
+
 export interface PlannedAlarm {
   ticker: string;
   market: Market;
@@ -28,6 +35,7 @@ export interface PlannedAlarm {
   params: { trigger: number; target: number };
   // 1-based ladder rung; null for recipes with no notion of one.
   rung: number | null;
+  phase: Phase;
 }
 
 // `row` is the 1-based index into the submitted rows (null for an error
@@ -70,6 +78,14 @@ const baseRowSchema = z.object({
 const explicitRowSchema = baseRowSchema.extend({
   trigger: positiveNumber,
   target: positiveNumber,
+  // Optional column; a blank cell (raw CSV) means BUY, same as omitting it.
+  phase: z.preprocess(
+    (value) =>
+      typeof value === 'string'
+        ? value.trim().toUpperCase() || undefined
+        : value,
+    z.enum(Phase, { error: 'must be BUY or SELL' }).default(Phase.BUY),
+  ),
 });
 
 const ladderRowSchema = baseRowSchema.extend({
@@ -142,6 +158,7 @@ function planLadder(
       strategyType: StrategyType.MANUAL_THRESHOLD,
       params: { trigger, target },
       rung,
+      phase: Phase.BUY,
     });
   }
   return rungs;
@@ -197,13 +214,19 @@ export function expandRecipe(
       return;
     }
 
-    const key = `${data.market}:${data.ticker}`;
+    // A ladder row expands to every rung itself, so a second row for the
+    // same ticker is always a mistake. Explicit rows legitimately repeat a
+    // ticker (one row per rung, like the old CSV), so only an identical
+    // trigger/target pair counts as a duplicate there.
+    const thresholds =
+      'trigger' in data ? `${data.trigger}/${data.target}` : null;
+    const key = `${data.market}:${data.ticker}:${thresholds ?? ''}`;
     const firstRow = firstSeenAt.get(key);
     if (firstRow !== undefined) {
-      errors.push({
-        row,
-        message: `duplicate of row ${firstRow} (${data.ticker} on ${data.market})`,
-      });
+      const what = thresholds
+        ? `${data.ticker} on ${data.market} at ${thresholds}`
+        : `${data.ticker} on ${data.market}`;
+      errors.push({ row, message: `duplicate of row ${firstRow} (${what})` });
       return;
     }
     firstSeenAt.set(key, row);
@@ -219,6 +242,7 @@ export function expandRecipe(
                 strategyType: StrategyType.MANUAL_THRESHOLD,
                 params: { trigger: data.trigger, target: data.target },
                 rung: null,
+                phase: data.phase,
               } satisfies PlannedAlarm,
             ]
           : [];
