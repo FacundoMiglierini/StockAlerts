@@ -39,6 +39,11 @@ src/
                             per-strategy cross-field checks (mirrors the
                             backend Zod schema's .refine() where one exists;
                             the rest are UX-only, not backend-enforced)
+  sorting.ts                SortField { label, kind, defaultDir, compare
+                              (ascending) } + sortItems(items, fields,
+                              state, tieBreak): 'desc' reverses the field
+                              only — tieBreak always runs ascending, so
+                              equal items stay A → Z either way
   pagination.ts             usePagination(items, pageSize, resetKey) — client-
                               side (lists are fetched whole); page is clamped
                               when items shrink, reset to 1 when resetKey
@@ -71,12 +76,11 @@ src/
                               strategies.ts; params are edited as strings,
                               not numbers (see in-file comment on why —
                               avoids a stuck-leading-zero bug)
-    AlarmList.tsx            alarms grouped per ticker+market, sorted by
-                              a toolbar select (GROUP_COMPARATORS): Ticker
-                              A–Z (default), Needs attention (triggered +
-                              waiting-to-sell count), Recently created
-                              (newest alarm), Most alarms — whole groups
-                              only, ties broken by ticker;
+    AlarmList.tsx            alarms grouped per ticker+market, sorted via
+                              SortControl (GROUP_SORT_FIELDS): Ticker (A → Z
+                              default), Needs attention (triggered +
+                              waiting-to-sell count), Created (newest
+                              alarm), Alarm count — whole groups only;
                               collapsible (collapsed by default; Expand/
                               Collapse all; forceExpanded while a ticker
                               search is active). Header: portfolio tag(s) +
@@ -106,6 +110,11 @@ src/
                               zero errors
     TickerInput.tsx          ticker field with a searchable autocomplete
                               dropdown (tickers.ts); still free text
+    SortControl.tsx          field select + direction button whose label
+                              says what the order means ("A → Z", "Newest
+                              first", "High → low"). Picking a field resets
+                              to its defaultDir; the button is highlighted
+                              only when reversed from it
     Pagination.tsx           Prev/numbers/Next + "11–20 of 34 <items>";
                               renders nothing for a single page; scrolls to
                               top on change. Used by AlarmList (10 tickers
@@ -158,9 +167,9 @@ src/
                               alarm count, since it cascades to the portfolio's
                               alarms, triggered ones included. "View alarms"
                               goes to /alarms?portfolio=<id>. Filter bar:
-                              name search + sort (Newest default, Oldest,
-                              Name A–Z, Most alarms); both reset
-                              pagination. Its "Import
+                              name search + SortControl (Created — newest
+                              first by default —, Name, Alarm count); both
+                              reset pagination. Its "Import
                               portfolio" button stays visible on mobile
                               (.portfolio-import-trigger) — it shares
                               .new-alarm-trigger's look, which mobile hides

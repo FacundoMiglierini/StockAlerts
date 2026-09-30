@@ -16,6 +16,8 @@ import {
 } from './icons';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Pagination } from './Pagination';
+import { SortControl } from './SortControl';
+import { sortItems, type SortField, type SortState } from '../sorting';
 import { usePagination } from '../pagination';
 
 interface Props {
@@ -61,14 +63,7 @@ interface AlarmGroup {
   newest: string;
 }
 
-type GroupSort = 'TICKER' | 'ATTENTION' | 'NEWEST' | 'MOST_ALARMS';
-
-const SORT_LABELS: Record<GroupSort, string> = {
-  TICKER: 'Ticker A–Z',
-  ATTENTION: 'Needs attention',
-  NEWEST: 'Recently created',
-  MOST_ALARMS: 'Most alarms',
-};
+type GroupSortField = 'TICKER' | 'ATTENTION' | 'CREATED' | 'ALARMS';
 
 // numeric: X2 before X10.
 const byTicker = (a: AlarmGroup, b: AlarmGroup) =>
@@ -76,19 +71,37 @@ const byTicker = (a: AlarmGroup, b: AlarmGroup) =>
   a.market.localeCompare(b.market);
 
 // Whole groups are sorted, never alarms across groups, so a ladder stays
-// together. Ticker order breaks every tie, keeping the order stable.
-const GROUP_COMPARATORS: Record<
-  GroupSort,
-  (a: AlarmGroup, b: AlarmGroup) => number
-> = {
-  TICKER: byTicker,
+// together; ties fall back to ticker A → Z (see sortItems).
+const GROUP_SORT_FIELDS: Record<GroupSortField, SortField<AlarmGroup>> = {
+  TICKER: {
+    label: 'Ticker',
+    kind: 'text',
+    defaultDir: 'asc',
+    compare: byTicker,
+  },
   // Triggered alarms and open positions (waiting to sell) are what the
   // user has to act on or watch.
-  ATTENTION: (a, b) =>
-    b.triggered + b.selling - (a.triggered + a.selling) || byTicker(a, b),
-  NEWEST: (a, b) => b.newest.localeCompare(a.newest) || byTicker(a, b),
-  MOST_ALARMS: (a, b) => b.alarms.length - a.alarms.length || byTicker(a, b),
+  ATTENTION: {
+    label: 'Needs attention',
+    kind: 'number',
+    defaultDir: 'desc',
+    compare: (a, b) => a.triggered + a.selling - (b.triggered + b.selling),
+  },
+  CREATED: {
+    label: 'Created',
+    kind: 'date',
+    defaultDir: 'desc',
+    compare: (a, b) => a.newest.localeCompare(b.newest),
+  },
+  ALARMS: {
+    label: 'Alarm count',
+    kind: 'number',
+    defaultDir: 'desc',
+    compare: (a, b) => a.alarms.length - b.alarms.length,
+  },
 };
+
+const INITIAL_SORT: SortState<GroupSortField> = { field: 'TICKER', dir: 'asc' };
 
 function paramStats(alarm: Alarm): ParamStat[] {
   const currency = CURRENCY_SYMBOLS[alarm.market];
@@ -237,15 +250,15 @@ export function AlarmList({
 }: Props) {
   const [pendingDelete, setPendingDelete] = useState<Alarm | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [sort, setSort] = useState<GroupSort>('TICKER');
+  const [sort, setSort] = useState(INITIAL_SORT);
   const groups = useMemo(
-    () => groupAlarms(alarms).sort(GROUP_COMPARATORS[sort]),
+    () => sortItems(groupAlarms(alarms), GROUP_SORT_FIELDS, sort, byTicker),
     [alarms, sort],
   );
   const pagination = usePagination(
     groups,
     TICKERS_PER_PAGE,
-    `${paginationKey}|${sort}`,
+    `${paginationKey}|${sort.field}|${sort.dir}`,
   );
 
   if (alarms.length === 0) {
@@ -275,20 +288,13 @@ export function AlarmList({
     <>
       <div className="alarm-groups-toolbar">
         <span className="text-muted">{plural(groups.length, 'ticker')}</span>
-        <select
-          className={
-            sort !== 'TICKER' ? 'filter-select is-active' : 'filter-select'
-          }
+        <SortControl
+          fields={GROUP_SORT_FIELDS}
           value={sort}
-          onChange={(e) => setSort(e.target.value as GroupSort)}
-          aria-label="Sort tickers"
-        >
-          {Object.entries(SORT_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              Sort: {label}
-            </option>
-          ))}
-        </select>
+          initial={INITIAL_SORT}
+          onChange={setSort}
+          itemLabel="tickers"
+        />
         {!forceExpanded && (
           <div className="alarm-groups-toggle">
             <button
