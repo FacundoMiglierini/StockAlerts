@@ -65,10 +65,15 @@ src/
                               not numbers (see in-file comment on why —
                               avoids a stuck-leading-zero bug)
     AlarmList.tsx            list + status actions (enable/disable/re-arm/
-                              delete); delete goes through ConfirmDialog
-    FiltersBar.tsx           client-side market/status/date-range filtering
-                              for AlarmsPage — no backend query params, the
-                              full list is already fetched
+                              delete); delete goes through ConfirmDialog.
+                              Alarms from a portfolio import get a tag with
+                              the portfolio's name (portfolioNames map)
+    FiltersBar.tsx           client-side market/status/date-range/portfolio
+                              filtering for AlarmsPage — no backend query
+                              params, the full list is already fetched.
+                              Portfolio filter: 'ALL' | 'NONE' (hand-made
+                              alarms) | a portfolio id; only shown when the
+                              user has at least one portfolio
     PortfolioImportForm.tsx  the import flow inside PortfoliosPage's wide Modal:
                               recipe + name (+ ladder options as % strings),
                               CSV pasted or loaded from a file -> "Preview
@@ -112,16 +117,21 @@ src/
                               "New alarm" opens AlarmForm in a Modal, mobile
                               keeps the full-page /alarms/new flow; renders
                               FiltersBar above AlarmList when there's at
-                              least one alarm
+                              least one alarm. Also fetches GET /portfolios
+                              to resolve Alarm.portfolioId to a name, done
+                              client-side rather than joined into GET /alarms
+                              so PATCH responses (which replace alarms in
+                              state) don't drop it; a failed fetch just
+                              leaves alarms untagged. ?portfolio=<id>
+                              preselects the filter (read once on mount)
     CreateAlarmPage.tsx      mobile-only full-page alarm creation
     PortfoliosPage.tsx       /portfolios ("Portfolios" nav tab): list of
                               imported portfolios (name, alarm count, created)
                               with "Import portfolio" -> PortfolioImportForm.
                               Delete goes through ConfirmDialog and states the
                               alarm count, since it cascades to the portfolio's
-                              alarms, triggered ones included. Alarms created
-                              here also show up on AlarmsPage — there's no
-                              per-portfolio filter there yet
+                              alarms, triggered ones included. "View alarms"
+                              goes to /alarms?portfolio=<id>
     SettingsPage.tsx         Appearance (theme picker, via ThemeContext) +
                               Telegram chat id linking (PATCH /users/me)
     AdminPage.tsx            admin-only user roster (GET /users): a <table>

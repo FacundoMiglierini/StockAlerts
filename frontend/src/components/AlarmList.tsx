@@ -11,6 +11,7 @@ import {
   EmptyAlarmsIcon,
   ClockIcon,
   CheckCircleIcon,
+  LayersIcon,
 } from './icons';
 import { ConfirmDialog } from './ConfirmDialog';
 
@@ -19,6 +20,8 @@ interface Props {
   onSetStatus: (id: string, status: 'ACTIVE' | 'DISABLED') => void;
   onEdit: (alarm: Alarm) => void;
   onDelete: (id: string) => void;
+  // Portfolio id -> name, for tagging alarms that came from an import.
+  portfolioNames: Map<string, string>;
 }
 
 interface ParamStat {
@@ -72,7 +75,13 @@ function StatusBadge({ status }: { status: Alarm['status'] }) {
   );
 }
 
-export function AlarmList({ alarms, onSetStatus, onEdit, onDelete }: Props) {
+export function AlarmList({
+  alarms,
+  onSetStatus,
+  onEdit,
+  onDelete,
+  portfolioNames,
+}: Props) {
   const [pendingDelete, setPendingDelete] = useState<Alarm | null>(null);
 
   if (alarms.length === 0) {
@@ -101,6 +110,15 @@ export function AlarmList({ alarms, onSetStatus, onEdit, onDelete }: Props) {
               <div className="alarm-identity-main">
                 <strong className="ticker">{alarm.ticker}</strong>
                 <span className="tag">{MARKET_LABELS[alarm.market]}</span>
+                {alarm.portfolioId && portfolioNames.has(alarm.portfolioId) && (
+                  <span
+                    className="tag portfolio-tag"
+                    title={`From portfolio "${portfolioNames.get(alarm.portfolioId)}"`}
+                  >
+                    <LayersIcon size={11} />
+                    <span>{portfolioNames.get(alarm.portfolioId)}</span>
+                  </span>
+                )}
               </div>
               <span className="alarm-strategy-label">
                 {STRATEGY_LABELS[alarm.strategyType]}

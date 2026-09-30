@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
-import type { Alarm, AlarmStatus, Market, StrategyType } from '../types';
+import type {
+  Alarm,
+  AlarmStatus,
+  Market,
+  Portfolio,
+  StrategyType,
+} from '../types';
 import { AlarmForm } from '../components/AlarmForm';
 import { AlarmList } from '../components/AlarmList';
 import { Modal } from '../components/Modal';
@@ -20,8 +26,20 @@ export function AlarmsPage() {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingAlarm, setEditingAlarm] = useState<Alarm | null>(null);
-  const [filters, setFilters] = useState<AlarmFilters>(DEFAULT_FILTERS);
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+  // `?portfolio=<id>` preselects the filter — the Portfolios page links here
+  // with it. Read once on mount; the URL isn't kept in sync afterwards.
+  const [searchParams] = useSearchParams();
+  const [filters, setFilters] = useState<AlarmFilters>(() => ({
+    ...DEFAULT_FILTERS,
+    portfolio: searchParams.get('portfolio') ?? 'ALL',
+  }));
   const { showSuccess, showError } = useToast();
+
+  const portfolioNames = useMemo(
+    () => new Map(portfolios.map((p) => [p.id, p.name])),
+    [portfolios],
+  );
 
   const filteredAlarms = useMemo(
     () => applyAlarmFilters(alarms, filters),
@@ -40,6 +58,12 @@ export function AlarmsPage() {
 
   useEffect(() => {
     loadAlarms().finally(() => setLoading(false));
+    // Only labels alarms and feeds the portfolio filter, so a failure here
+    // shouldn't hide the alarms themselves: they just render untagged.
+    api
+      .get<Portfolio[]>('/portfolios')
+      .then(setPortfolios)
+      .catch(() => {});
   }, []);
 
   async function handleCreate(
@@ -132,7 +156,11 @@ export function AlarmsPage() {
           New alarm
         </Link>
         {!loading && !error && alarms.length > 0 && (
-          <FiltersBar filters={filters} onChange={setFilters} />
+          <FiltersBar
+            filters={filters}
+            onChange={setFilters}
+            portfolios={portfolios}
+          />
         )}
         {loading && <p className="text-muted">Loading…</p>}
         {error && <p className="error-text">{error}</p>}
@@ -153,6 +181,7 @@ export function AlarmsPage() {
               onSetStatus={handleSetStatus}
               onEdit={setEditingAlarm}
               onDelete={handleDelete}
+              portfolioNames={portfolioNames}
             />
           )}
       </section>
