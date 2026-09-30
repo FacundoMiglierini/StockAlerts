@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import type { Portfolio } from '../types';
@@ -12,6 +12,29 @@ import { useToast } from '../components/Toast';
 
 const PORTFOLIOS_PER_PAGE = 10;
 
+type PortfolioSort = 'NEWEST' | 'OLDEST' | 'NAME' | 'MOST_ALARMS';
+
+const SORT_LABELS: Record<PortfolioSort, string> = {
+  NEWEST: 'Newest',
+  OLDEST: 'Oldest',
+  NAME: 'Name A–Z',
+  MOST_ALARMS: 'Most alarms',
+};
+
+// numeric: "Extra 2" before "Extra 10".
+const byName = (a: Portfolio, b: Portfolio) =>
+  a.name.localeCompare(b.name, undefined, { numeric: true });
+
+const COMPARATORS: Record<
+  PortfolioSort,
+  (a: Portfolio, b: Portfolio) => number
+> = {
+  NEWEST: (a, b) => b.createdAt.localeCompare(a.createdAt) || byName(a, b),
+  OLDEST: (a, b) => a.createdAt.localeCompare(b.createdAt) || byName(a, b),
+  NAME: byName,
+  MOST_ALARMS: (a, b) => b.alarmCount - a.alarmCount || byName(a, b),
+};
+
 export function PortfoliosPage() {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +43,19 @@ export function PortfoliosPage() {
   const [pendingDelete, setPendingDelete] = useState<Portfolio | null>(null);
   const { showSuccess, showError } = useToast();
   const navigate = useNavigate();
-  const pagination = usePagination(portfolios, PORTFOLIOS_PER_PAGE);
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<PortfolioSort>('NEWEST');
+  const visible = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return portfolios
+      .filter((p) => p.name.toLowerCase().includes(needle))
+      .sort(COMPARATORS[sort]);
+  }, [portfolios, search, sort]);
+  const pagination = usePagination(
+    visible,
+    PORTFOLIOS_PER_PAGE,
+    `${search.trim()}|${sort}`,
+  );
 
   async function loadPortfolios() {
     setError(null);
@@ -69,8 +104,9 @@ export function PortfoliosPage() {
           </div>
           <div className="section-header-actions">
             <span className="tag">
-              {portfolios.length}{' '}
-              {portfolios.length === 1 ? 'portfolio' : 'portfolios'}
+              {visible.length === portfolios.length
+                ? `${portfolios.length} ${portfolios.length === 1 ? 'portfolio' : 'portfolios'}`
+                : `${visible.length} of ${portfolios.length} portfolios`}
             </span>
             <button
               type="button"
@@ -100,6 +136,45 @@ export function PortfoliosPage() {
         )}
 
         {!loading && !error && portfolios.length > 0 && (
+          <div className="filters-bar">
+            <input
+              type="search"
+              className={
+                search.trim() ? 'filter-search is-active' : 'filter-search'
+              }
+              placeholder="Search name"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Search portfolios by name"
+            />
+            <select
+              className={
+                sort !== 'NEWEST' ? 'filter-select is-active' : 'filter-select'
+              }
+              value={sort}
+              onChange={(e) => setSort(e.target.value as PortfolioSort)}
+              aria-label="Sort portfolios"
+            >
+              {Object.entries(SORT_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  Sort: {label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {!loading &&
+          !error &&
+          portfolios.length > 0 &&
+          visible.length === 0 && (
+            <div className="empty-state">
+              <h3>No portfolios match "{search.trim()}"</h3>
+              <p>Try another name or clear the search.</p>
+            </div>
+          )}
+
+        {!loading && !error && visible.length > 0 && (
           <ul className="portfolio-list">
             {pagination.pageItems.map((p) => (
               <li key={p.id} className="card portfolio-row">

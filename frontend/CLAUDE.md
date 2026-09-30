@@ -71,7 +71,12 @@ src/
                               strategies.ts; params are edited as strings,
                               not numbers (see in-file comment on why —
                               avoids a stuck-leading-zero bug)
-    AlarmList.tsx            alarms grouped per ticker+market (A–Z),
+    AlarmList.tsx            alarms grouped per ticker+market, sorted by
+                              a toolbar select (GROUP_COMPARATORS): Ticker
+                              A–Z (default), Needs attention (triggered +
+                              waiting-to-sell count), Recently created
+                              (newest alarm), Most alarms — whole groups
+                              only, ties broken by ticker;
                               collapsible (collapsed by default; Expand/
                               Collapse all; forceExpanded while a ticker
                               search is active). Header: portfolio tag(s) +
@@ -152,7 +157,10 @@ src/
                               Delete goes through ConfirmDialog and states the
                               alarm count, since it cascades to the portfolio's
                               alarms, triggered ones included. "View alarms"
-                              goes to /alarms?portfolio=<id>. Its "Import
+                              goes to /alarms?portfolio=<id>. Filter bar:
+                              name search + sort (Newest default, Oldest,
+                              Name A–Z, Most alarms); both reset
+                              pagination. Its "Import
                               portfolio" button stays visible on mobile
                               (.portfolio-import-trigger) — it shares
                               .new-alarm-trigger's look, which mobile hides
