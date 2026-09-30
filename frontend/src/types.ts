@@ -78,7 +78,8 @@ export interface PlannedAlarm {
   market: Market;
   strategyType: 'MANUAL_THRESHOLD';
   params: { trigger: number; target: number };
-  // 1-based ladder rung; null for recipes with no notion of one.
+  // 1-based ladder rung (for explicit rows: rank by trigger, highest = 1
+  // per ticker+market). Never null in a preview response.
   rung: number | null;
   // SELL = position already bought; the alarm only watches for `target`.
   phase: 'BUY' | 'SELL';
