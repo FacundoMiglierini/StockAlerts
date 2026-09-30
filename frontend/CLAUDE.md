@@ -39,6 +39,13 @@ src/
                             per-strategy cross-field checks (mirrors the
                             backend Zod schema's .refine() where one exists;
                             the rest are UX-only, not backend-enforced)
+  pagination.ts             usePagination(items, pageSize, resetKey) — client-
+                              side (lists are fetched whole); page is clamped
+                              when items shrink, reset to 1 when resetKey
+                              (the filters) changes. pageWindow() for the
+                              "1 … 4 5 6 … 9" buttons. Separate from
+                              Pagination.tsx so the component file only
+                              exports components (react-refresh lint rule)
   csv.ts                    minimal CSV reader for the portfolio import: quoted
                             fields, `,`/`;`/tab delimiters (auto-detected),
                             BOM/CRLF, and the old script's `symbol` header read
@@ -64,12 +71,21 @@ src/
                               strategies.ts; params are edited as strings,
                               not numbers (see in-file comment on why —
                               avoids a stuck-leading-zero bug)
-    AlarmList.tsx            list + status actions (enable/disable/re-arm/
-                              delete); delete goes through ConfirmDialog.
-                              Alarms from a portfolio import get a tag with
-                              the portfolio's name (portfolioNames map)
-    FiltersBar.tsx           client-side market/status/date-range/portfolio
-                              filtering for AlarmsPage — no backend query
+    AlarmList.tsx            alarms grouped per ticker+market (A–Z),
+                              collapsible (collapsed by default; Expand/
+                              Collapse all; forceExpanded while a ticker
+                              search is active). Header: portfolio tag(s) +
+                              counts (waiting to sell/triggered/disabled).
+                              Rows: MANUAL_THRESHOLD first, by trigger
+                              descending and numbered #1..n as ladder steps,
+                              labelled by phase (Waiting to buy/sell, Sold);
+                              other strategies after, newest first. Params
+                              follow STRATEGY_FIELDS order, not the stored
+                              jsonb order (Postgres puts `target` before
+                              `trigger`). Status actions + delete via
+                              ConfirmDialog, per row
+    FiltersBar.tsx           client-side ticker search + market/status/
+                              date-range/portfolio filtering for AlarmsPage — no backend query
                               params, the full list is already fetched.
                               Portfolio filter: 'ALL' | 'NONE' (hand-made
                               alarms) | a portfolio id; only shown when the
@@ -85,6 +101,11 @@ src/
                               zero errors
     TickerInput.tsx          ticker field with a searchable autocomplete
                               dropdown (tickers.ts); still free text
+    Pagination.tsx           Prev/numbers/Next + "11–20 of 34 <items>";
+                              renders nothing for a single page; scrolls to
+                              top on change. Used by AlarmList (10 tickers
+                              per page — paginates groups, so a ladder never
+                              splits) and PortfoliosPage (10 per page)
     Modal.tsx                generic centered modal (Escape/backdrop close)
     ConfirmDialog.tsx        Modal-based yes/no prompt — used for delete
                               alarm/user, disable user, and logout
@@ -131,7 +152,12 @@ src/
                               Delete goes through ConfirmDialog and states the
                               alarm count, since it cascades to the portfolio's
                               alarms, triggered ones included. "View alarms"
-                              goes to /alarms?portfolio=<id>
+                              goes to /alarms?portfolio=<id>. Its "Import
+                              portfolio" button stays visible on mobile
+                              (.portfolio-import-trigger) — it shares
+                              .new-alarm-trigger's look, which mobile hides
+                              for alarms since they have a separate
+                              full-page flow
     SettingsPage.tsx         Appearance (theme picker, via ThemeContext) +
                               Telegram chat id linking (PATCH /users/me)
     AdminPage.tsx            admin-only user roster (GET /users): a <table>

@@ -182,6 +182,8 @@ export function AlarmsPage() {
               onEdit={setEditingAlarm}
               onDelete={handleDelete}
               portfolioNames={portfolioNames}
+              forceExpanded={filters.search.trim() !== ''}
+              paginationKey={JSON.stringify(filters)}
             />
           )}
       </section>

@@ -587,80 +587,161 @@ button.danger {
   white-space: nowrap;
 }
 
-/* Alarms list */
+/* Alarms list — grouped by ticker+market (AlarmList.tsx) */
 
-.alarm-list {
+.alarm-groups-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.82rem;
+}
+
+.alarm-groups-toggle {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.alarm-groups-toggle button {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.78rem;
+}
+
+.alarm-groups {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-}
-
-.alarm-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.6rem 1rem;
-  padding: 1.1rem 1.25rem;
-}
-
-.alarm-row.is-triggered {
-  border-color: var(--triggered-soft);
-}
-
-.alarm-row.is-disabled {
-  opacity: 0.7;
-}
-
-.alarm-identity {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  grid-column: 1;
-}
-
-.alarm-identity-main {
-  display: flex;
-  align-items: center;
   gap: 0.6rem;
 }
 
-.alarm-identity .ticker {
-  font-size: 1.05rem;
+.alarm-group {
+  padding: 0;
+  overflow: hidden;
+}
+
+.alarm-group-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.85rem 1.1rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.alarm-group-header:hover:not(:disabled) {
+  background: var(--bg);
+}
+
+/* Disabled only while a search force-expands every group: not a dead
+   control, so keep it at full opacity. */
+.alarm-group-header:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.alarm-group-header .ticker {
+  font-size: 1.02rem;
   font-weight: 700;
 }
+
+.alarm-group-chevron {
+  display: inline-flex;
+  color: var(--text-faint);
+  transform: rotate(-90deg);
+  transition: transform 0.15s ease;
+}
+
+.alarm-group-header.is-open .alarm-group-chevron {
+  transform: none;
+}
+
+.alarm-group-summary {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.alarm-group-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+
+.alarm-line {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.6rem 1.1rem;
+}
+
+.alarm-line + .alarm-line {
+  border-top: 1px solid var(--border);
+}
+
+.alarm-line.is-triggered {
+  box-shadow: inset 3px 0 0 var(--triggered);
+}
+
+.alarm-line.is-disabled {
+  opacity: 0.65;
+}
+
+.alarm-line-step {
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}
+
+.alarm-line-params {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 1.1rem;
+}
+
+.alarm-line-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.alarm-line-stat .alarm-param-label {
+  margin-bottom: 0;
+}
+
+.alarm-line-state {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+}
+
+.alarm-line .alarm-actions button {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.78rem;
+}
+
+/* Alarm param labels/values, shared by AlarmList's rows */
 
 .alarm-strategy-label {
   font-size: 0.82rem;
   color: var(--text-muted);
 }
 
-.alarm-status-col {
-  grid-column: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.3rem;
-}
-
 .alarm-triggered-at {
   font-size: 0.72rem;
   color: var(--text-faint);
-}
-
-.alarm-param-grid {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.6rem;
-}
-
-.alarm-param-stat {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 0.55rem 0.75rem;
 }
 
 .alarm-param-label {
@@ -674,16 +755,6 @@ button.danger {
 .alarm-param-value {
   font-size: 0.88rem;
   font-weight: 700;
-}
-
-.alarm-footer {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  border-top: 1px solid var(--border);
-  padding-top: 0.75rem;
 }
 
 .notification-status {
@@ -1037,6 +1108,43 @@ textarea::placeholder {
   color: var(--text-muted);
 }
 
+/* Pagination (components/Pagination.tsx) */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  font-size: 0.82rem;
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.pagination-pages button {
+  min-width: 2.1rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  justify-content: center;
+}
+
+.pagination-pages button.is-current {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.pagination-gap {
+  padding: 0 0.25rem;
+  color: var(--text-faint);
+}
+
 /* Empty state */
 
 .empty-state {
@@ -1263,6 +1371,17 @@ textarea::placeholder {
   border-radius: 999px;
 }
 
+.filter-search {
+  width: 9.5rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+  border-radius: 999px;
+}
+
+.filter-search.is-active {
+  border-color: var(--accent);
+}
+
 .filter-select.is-active {
   background-color: var(--accent-soft);
   border-color: var(--accent);
@@ -1398,25 +1517,50 @@ textarea::placeholder {
     display: flex;
   }
 
-  .alarm-row {
-    grid-template-columns: 1fr;
-  }
-
-  .alarm-status-col {
-    grid-column: 1;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .alarm-footer {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.6rem;
-  }
-
   .alarm-actions {
     justify-content: flex-start;
+  }
+
+  .alarm-line {
+    grid-template-columns: 2.2rem minmax(0, 1fr);
+  }
+
+  /* .new-alarm-trigger is hidden here because alarms have a separate
+     mobile-only link; portfolios have no such page, so keep theirs. */
+  .portfolio-import-trigger {
+    display: inline-flex;
+    white-space: nowrap;
+  }
+
+  .portfolio-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .portfolio-actions button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .pagination {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .pagination-pages {
+    justify-content: center;
+  }
+
+  .alarm-line-state,
+  .alarm-line .alarm-actions {
+    grid-column: 2;
+  }
+
+  .alarm-group-summary {
+    margin-left: 0;
+    flex-basis: 100%;
+    padding-left: 1.4rem;
   }
 
   .mobile-new-alarm-link {

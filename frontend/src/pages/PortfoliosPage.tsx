@@ -5,8 +5,12 @@ import type { Portfolio } from '../types';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { LayersIcon, PlusIcon, TrashIcon } from '../components/icons';
 import { Modal } from '../components/Modal';
+import { Pagination } from '../components/Pagination';
 import { PortfolioImportForm } from '../components/PortfolioImportForm';
+import { usePagination } from '../pagination';
 import { useToast } from '../components/Toast';
+
+const PORTFOLIOS_PER_PAGE = 10;
 
 export function PortfoliosPage() {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
@@ -16,6 +20,7 @@ export function PortfoliosPage() {
   const [pendingDelete, setPendingDelete] = useState<Portfolio | null>(null);
   const { showSuccess, showError } = useToast();
   const navigate = useNavigate();
+  const pagination = usePagination(portfolios, PORTFOLIOS_PER_PAGE);
 
   async function loadPortfolios() {
     setError(null);
@@ -69,7 +74,7 @@ export function PortfoliosPage() {
             </span>
             <button
               type="button"
-              className="new-alarm-trigger"
+              className="new-alarm-trigger portfolio-import-trigger"
               onClick={() => setImporting(true)}
             >
               <PlusIcon />
@@ -96,7 +101,7 @@ export function PortfoliosPage() {
 
         {!loading && !error && portfolios.length > 0 && (
           <ul className="portfolio-list">
-            {portfolios.map((p) => (
+            {pagination.pageItems.map((p) => (
               <li key={p.id} className="card portfolio-row">
                 <div>
                   <div className="portfolio-name">{p.name}</div>
@@ -132,6 +137,7 @@ export function PortfoliosPage() {
             ))}
           </ul>
         )}
+        <Pagination state={pagination} itemLabel="portfolios" />
       </section>
 
       {importing && (
