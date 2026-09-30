@@ -80,6 +80,9 @@ src/
                              worker/CLAUDE.md for the Telegram linking steps
     alarms/         per-user alarm CRUD + strategy param validation
       strategies/strategy-params.schema.ts   <- Zod schema per StrategyType
+    portfolios/     bulk alarm creation from a CSV-shaped table — see
+                    "Portfolios" below
+      recipes/expand-recipe.ts               <- pure rows -> alarms planner
   generated/prisma/  Prisma client output (gitignored, `npx prisma generate`)
 prisma/
   schema.prisma
@@ -154,6 +157,52 @@ already used, updates the password, and deletes any other outstanding
 tokens for that user in the same transaction. Requires `FRONTEND_URL` (no
 trailing slash) to build the emailed link.
 
+## Portfolios: bulk alarm creation
+
+Replaces loading alarms one by one (added 2026-09-20). A `Portfolio`
+(`id, userId, name`, unique per user) groups the alarms one import
+creates; `Alarm.portfolioId` is nullable (null for hand-made alarms) and
+`ON DELETE CASCADE`, so deleting a portfolio deletes its alarms. The worker
+never reads `portfolioId` — it's purely a backend/UI grouping key, so the
+"communicate only through the DB" rule is untouched (`db.py` selects an
+explicit column list, so the new column doesn't affect it).
+
+Endpoints (all JWT-guarded, scoped to the caller): `GET /portfolios` (with
+`alarmCount`), `POST /portfolios/preview` (200, writes nothing),
+`POST /portfolios` (one transaction: portfolio + every alarm, or nothing;
+409 on a duplicate name), `DELETE /portfolios/:id`. The UI sends the
+**same payload** to preview and create (`{ name, recipe, rows, options? }`),
+so `PreviewPortfolioDto` tolerates `name` — the global `ValidationPipe`
+forbids unknown properties.
+
+`recipes/expand-recipe.ts` is a pure `expandRecipe(recipe, rows, options)
+-> { alarms, errors }`; the DTO only validates the envelope, and each row
+is validated there (Zod) so one bad row becomes a per-row `{ row, message }`
+error instead of a 400 on the first problem. Create refuses if `errors` is
+non-empty. Both recipes emit `MANUAL_THRESHOLD` alarms (BUY at `trigger`,
+then SELL at `target`), and every generated alarm is re-checked against
+`strategyParamsSchemas`:
+
+- `EXPLICIT_THRESHOLDS`: row = `ticker, market, trigger, target`, 1 alarm.
+- `DRAWDOWN_LADDER`: row = `ticker, market, reference`, plus import-wide
+  `options { dropPct, gainPct, entries }` (fractions, `entries` 1–10). This
+  is the old script's `--newtrades`: `trigger_i = reference × (1 − dropPct)^i`,
+  `target_i = trigger_i × (1 + gainPct)`, prices **frozen at import time**
+  (the reference is the caller's number — the backend has no price data;
+  the old script used the last `argrelextrema` local high). Rounded to 2
+  decimals, or 6 when the reference is below 1 (sub-dollar crypto).
+
+Rules worth knowing before touching it: tickers are **bare** (same mapping
+as the frontend — the worker's `resolve_symbol()` appends `.BA`/`-USD`),
+so a BYMA ticker ending `.BA` or a CRYPTO ticker ending `-USD` is
+rejected rather than silently stripped; `market` is case-insensitive;
+numeric cells may be numbers or numeric strings (raw CSV cells pass
+through); duplicate `ticker+market` rows in one import are rejected; at
+most 500 rows and 500 resulting alarms per import. The backend can't tell
+whether a rung's trigger is already above the current price — such a rung
+fires on the worker's next tick, so reference prices should be checked
+before importing.
+
 ## Alarms: adding a new strategy type
 
 1. Add the value to the `StrategyType` enum in `prisma/schema.prisma`, then
@@ -186,8 +235,8 @@ mocked in `users.service.spec.ts` (real bcrypt is deliberately slow) with a
 fake hash format (`` `hashed:${plain}` ``) that a fake `compare` can check
 against — swap both if bcrypt's usage ever changes shape.
 
-**`test/` now has real e2e coverage** (21 tests, `auth`/`alarms`/
-`notification-channels`): full HTTP requests via `supertest` against a real
+**`test/` now has real e2e coverage** (34 tests, `auth`/`alarms`/
+`portfolios`/`notification-channels`): full HTTP requests via `supertest` against a real
 Nest app (`test/helpers/app.ts` mirrors `main.ts`'s setup) and a real
 Postgres — `docker-compose.yml`'s `postgres-test` service, profile-gated
 (`profiles: ["test"]`) so a plain `docker compose up` never starts it, on

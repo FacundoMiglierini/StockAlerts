@@ -4,6 +4,7 @@ import { PrismaModule } from './common/prisma/prisma.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { AlarmsModule } from './modules/alarms/alarms.module.js';
+import { PortfoliosModule } from './modules/portfolios/portfolios.module.js';
 import { NotificationChannelsModule } from './modules/notification-channels/notification-channels.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 
@@ -14,6 +15,7 @@ import { HealthModule } from './modules/health/health.module.js';
     UsersModule,
     AuthModule,
     AlarmsModule,
+    PortfoliosModule,
     NotificationChannelsModule,
     HealthModule,
   ],

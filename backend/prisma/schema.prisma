@@ -84,6 +84,7 @@ model User {
   createdAt    DateTime @default(now())
 
   alarms          Alarm[]
+  portfolios      Portfolio[]
   channels        NotificationChannel[]
   resetTokens     PasswordResetToken[]
 
@@ -123,13 +124,37 @@ model Alarm {
   params             Json
   status             AlarmStatus        @default(ACTIVE)
   notificationStatus NotificationStatus @default(NOT_NOTIFIED)
+  // Set only for alarms created by a portfolio import (POST /portfolios);
+  // null for alarms created one by one. The worker never reads it — it's
+  // purely a grouping key for the backend/UI.
+  portfolioId        String?
+  portfolio          Portfolio?         @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
   triggeredAt        DateTime?
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
   @@index([userId])
   @@index([status, ticker])
+  @@index([portfolioId])
   @@map("alarms")
+}
+
+// A named batch of alarms created together by a recipe (see
+// backend/src/modules/portfolios) — the old script's `--newtrades` run,
+// made identifiable so a whole batch can be listed or removed at once.
+// Deleting a portfolio deletes its alarms (onDelete: Cascade on
+// Alarm.portfolio); the frontend confirms with the alarm count first.
+model Portfolio {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  createdAt DateTime @default(now())
+
+  alarms Alarm[]
+
+  @@unique([userId, name])
+  @@map("portfolios")
 }
 
 // A single-use, short-lived token for the "forgot password" flow. Only

@@ -273,6 +273,11 @@ alarms
                     once at creation, not user-editable afterward (same as
                     strategy_type) since changing it would mean the
                     ticker/params no longer describe the same instrument
+  portfolio_id   -> nullable; set when the alarm came from a portfolio import
+                    (POST /portfolios — a CSV of tickers expanded by a "recipe",
+                    e.g. the old script's drawdown ladder into N two-phase
+                    manual_threshold alarms; see backend/CLAUDE.md). Backend/UI
+                    grouping only — the worker never reads it
   params         -> jsonb, shape depends on strategy_type
                     (e.g. manual_threshold: {trigger, target};
                      rsi: {period, overbought, oversold})

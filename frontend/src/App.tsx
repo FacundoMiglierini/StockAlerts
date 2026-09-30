@@ -11,6 +11,7 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { AcceptInvitePage } from './pages/AcceptInvitePage';
 import { AlarmsPage } from './pages/AlarmsPage';
 import { CreateAlarmPage } from './pages/CreateAlarmPage';
+import { PortfoliosPage } from './pages/PortfoliosPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AdminPage } from './pages/AdminPage';
 
@@ -28,6 +29,7 @@ function App() {
               <Route element={<ProtectedRoute />}>
                 <Route element={<Layout />}>
                   <Route path="/alarms" element={<AlarmsPage />} />
+                  <Route path="/portfolios" element={<PortfoliosPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
                   <Route element={<AdminRoute />}>
                     <Route path="/admin" element={<AdminPage />} />

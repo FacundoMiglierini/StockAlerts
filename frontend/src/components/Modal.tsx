@@ -4,10 +4,12 @@ import type { ReactNode } from 'react';
 interface Props {
   title: string;
   onClose: () => void;
+  // For content that needs room, e.g. a preview table.
+  wide?: boolean;
   children: ReactNode;
 }
 
-export function Modal({ title, onClose, children }: Props) {
+export function Modal({ title, onClose, wide, children }: Props) {
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') onClose();
@@ -19,7 +21,7 @@ export function Modal({ title, onClose, children }: Props) {
   return (
     <div className="modal-overlay" onMouseDown={onClose}>
       <div
-        className="modal-panel card"
+        className={`modal-panel card${wide ? ' modal-panel-wide' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-label={title}
