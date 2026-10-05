@@ -197,6 +197,26 @@ fail every ticker, every tick, before falling back to yfinance anyway.
 than a hardcoded literal — override only for a proxy/mock in tests or a
 self-hosted mirror, not a normal deployment knob.
 
+**Every provider must validate its own output before returning it.**
+Confirmed live: yfinance returned a non-empty bar with `Low == 0` for a
+thinly-traded BYMA ticker (MORI) — no exception, so the existing
+`data.empty` check didn't catch it. That bar flowed straight into
+`manual_threshold.evaluate`, where `today["Low"] <= trigger` is true for
+almost any positive trigger — firing a false BUY and permanently advancing
+`notificationStatus` to `NOTIFIED_ONCE`. The *next* (correct) run then
+evaluated the SELL/target leg against that already-corrupted state and
+fired again, which looks like "triggered twice" but is really one bad
+fetch poisoning two runs. `price_provider/base.py`'s
+`validate_daily_history()` rejects empty/missing/non-positive OHLC values
+and a High below its own Low; both `YFinanceProvider` and `FinnhubProvider`
+call it before returning, so a bad bar now raises the same way empty data
+always has — `run.py`'s `except Exception` around the fetch skips that
+symbol's alarms for the tick instead of corrupting their state. A
+`notificationStatus` already corrupted by a run from before this check
+existed needs a manual DB correction (back to `NOT_NOTIFIED`/`ACTIVE`) —
+there's no automated recovery for that, since the worker can't tell a
+real BUY apart from a false one after the fact.
+
 ## Notifications: email + Telegram, no Twilio
 
 Both channels fire on every trigger via `CompositeNotifier`
@@ -266,34 +286,46 @@ created under a since-renamed project path and its console-script shebangs
 are stale — `uv run python -m pytest` (module form, bypasses the shebang)
 works around it, or delete `.venv` and re-`uv sync` to fix it properly.
 
-## Scheduling: long-lived loop (chosen), not host cron
+## Scheduling: host cron in production, long-lived loop only for local dev
 
-`docker-compose.yml`'s `worker` service runs `python -m worker.main` — a
-small `while True: run_once(); sleep(POLL_INTERVAL)` loop — rather than
-having the host's cron invoke `docker compose run --rm worker python -m
-worker.run` on a schedule. For this deployment (Docker Compose on a home
-server, fixed-interval checks rather than "run at exactly 9:30am"), the
-loop is the better default:
+**Reversed from the original decision below** (see root `CLAUDE.md`'s
+"Deploying for free" Part A step 1a): production runs the host's crontab
+invoking `docker compose run --rm worker uv run --no-dev python -m
+worker.run` hourly — a fresh, one-shot process per tick — not the loop.
+`docker-compose.yml`'s `worker` service (`python -m worker.main`, the
+`while True: run_once(); sleep(POLL_INTERVAL)` loop below) still exists and
+still runs via a plain `docker compose up`, but that's local-dev
+convenience only; it is never started in production (`scripts/deploy.sh`
+builds the `worker` image for cron to use but deliberately never `up -d`s
+it).
+
+The reason for the reversal: the loop's price-fetch call has no timeout
+around it. If a single fetch hangs, that loop iteration never returns —
+and since the process doesn't crash (just blocks forever), `restart:
+unless-stopped` never kicks in to notice or recover. Every future hourly
+run is silently dead until someone happens to check. A cron-triggered
+one-shot avoids this entirely: each invocation is a fresh process, so a
+hung run only costs that one run, not all subsequent ones. This is exactly
+why `worker.run` (one evaluation pass, no loop) was kept separate from
+`worker.main` from the start — it was already the right unit to schedule
+once wall-clock cron became the better fit.
+
+The original reasoning for choosing the loop, kept here since the
+trade-offs it describes are real — they just ended up outweighed by the
+hung-fetch risk above:
 
 - **Self-healing for free.** `restart: unless-stopped` + Docker's own
   restart-on-boot means the loop survives a crash or a host reboot with
   zero extra setup. Host cron depends on the host's cron daemon being
   installed, enabled, and the machine being awake — one more thing to
   verify/monitor that Docker already handles.
-- **One moving part instead of two.** Host cron would mean keeping a
-  crontab entry on the home server in sync with the project, outside of
+- **One moving part instead of two.** Host cron means keeping a crontab
+  entry on the home server in sync with the project, outside of
   `docker-compose.yml` — easy to lose track of, and invisible to `docker
   compose ps`.
 - **No exec overhead per tick.** `docker compose run` starts a fresh
   container (deps loaded from scratch, even if `uv` makes that fast) every
   invocation; the loop pays that cost once.
-
-Host cron (or a cron *sidecar container*, e.g. `alpine` + `busybox crond`
-in `docker-compose.yml`) would only be worth it if checks need to happen at
-specific wall-clock times (e.g. only at market open/close) rather than on a
-fixed interval — nothing here requires that yet. If it ever does,
-`worker.run` (one evaluation pass, no loop) is already the right unit to
-schedule — that's exactly why it's kept separate from `worker.main`.
 
 ## Docker: uv's official pattern, not `pip install`
 
