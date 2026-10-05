@@ -6,6 +6,7 @@ import pandas as pd
 import requests
 
 from .. import config
+from .base import validate_daily_history
 
 _PERIOD_TO_DAYS = {
     "1mo": 31,
@@ -58,4 +59,5 @@ class FinnhubProvider:
             },
             index=pd.to_datetime(data["t"], unit="s"),
         )
+        validate_daily_history(ticker, frame)
         return frame
