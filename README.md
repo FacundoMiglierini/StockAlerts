@@ -10,9 +10,7 @@ instances of a strategy with their own parameters and ticker (e.g. "RSI on
 AAPL, period 14, notify below 30"). Alarms are private to the user who
 created them.
 
-> Status: all three services are functional and run via Docker Compose.
-> The frontend's UI has not yet been clicked through in a real browser —
-> see `frontend/CLAUDE.md`'s "known gap" note.
+![Alarms dashboard](docs/alarms-dashboard.jpg)
 
 ## Architecture
 
@@ -45,7 +43,7 @@ the integration point.
 | Worker | Python (uv), pandas, SQLAlchemy |
 | Frontend | React + Vite, served by nginx |
 | Database | PostgreSQL |
-| Price data | yfinance (Finnhub free tier can't serve historical data — see `worker/CLAUDE.md`) |
+| Price data | yfinance (Finnhub's free tier doesn't serve historical data) |
 | Notifications | Email (SMTP), Telegram |
 | Deployment | Docker Compose, self-hosted on a home Linux server |
 
@@ -58,10 +56,16 @@ docker compose up -d --build
 
 This starts Postgres, the backend (migrates the schema and seeds an admin
 user on first boot) on `:3000`, the worker (polls on an interval, see
-`WORKER_POLL_INTERVAL_SECONDS`), and the frontend on `:5173`. See
-`backend/CLAUDE.md`, `worker/CLAUDE.md`, and `frontend/CLAUDE.md` for
-running each service outside Docker.
+`WORKER_POLL_INTERVAL_SECONDS`), and the frontend on `:5173`.
+
+## Development
+
+Each service has its own notes on architecture, tests and running it
+outside Docker: [`backend/CLAUDE.md`](backend/CLAUDE.md),
+[`worker/CLAUDE.md`](worker/CLAUDE.md) and
+[`frontend/CLAUDE.md`](frontend/CLAUDE.md). The root
+[`CLAUDE.md`](CLAUDE.md) covers cross-cutting decisions and deployment.
 
 ## License
 
-Personal project — no license granted for reuse yet.
+[MIT](LICENSE)
