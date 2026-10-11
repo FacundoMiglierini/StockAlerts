@@ -12,6 +12,8 @@ created them.
 
 ![Alarms dashboard](docs/alarms-dashboard.jpg)
 
+![Telegram alert](docs/telegram-alert.jpg)
+
 ## Architecture
 
 Three services in one repo, talking only through a shared database.
